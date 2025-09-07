@@ -12,7 +12,7 @@
     .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     input[type="text"] { padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; }
     input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
-    button { padding: 10px 14px; border: 0; border-radius: 8px; cursor: pointer; }
+    button { padding: 6px 8px; border: 0; border-radius: 8px; cursor: pointer; margin: 1px }
     .btn { background: #3b82f6; color: white; }
     .btn-secondary { background: #0ea5e9; color: white; }
     .muted { color: #6b7280; }
@@ -24,13 +24,19 @@
     a { color: #2563eb; text-decoration: none; }
     a:hover { text-decoration: underline; }
 
-    /* Modal */
+    /* Modal Imagen */
     #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
       background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
     #modalContent { position:relative; background:#fff; padding:16px; border-radius:12px; 
       max-width:90%; max-height:90%; }
     #modalImg { max-width:100%; max-height:80vh; display:block; margin:auto; border-radius:8px; }
-    #cerrarModal { position:absolute; top:8px; right:12px; cursor:pointer; font-size:20px; }
+    #cerrarModal {  position:absolute; top:8px; right:12px; cursor:pointer; font-size:22px; font-weight:bold; color:#555; background:none; border:none; }
+
+    /* Modal Dirección */
+    #modalDireccion { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
+    #modalDireccionContent { background:#fff; padding:16px; border-radius:12px; max-width:500px; width:90%; position:relative; }
+    #cerrarModalDireccion { position:absolute; top:8px; right:12px; cursor:pointer; font-size:20px; }
   </style>
 </head>
 <body>
@@ -52,7 +58,8 @@
       <h2 style="margin-top:0">Agregar / Editar datos</h2>
       <div class="row">
         <input id="nuevoEmpresa" type="text" placeholder="Empresa / Lugar" />
-        <input id="nuevaDireccion" type="text" placeholder="Dirección" />
+        <input id="nuevaDireccion" type="text" placeholder="Dirección corta" />
+        <input id="nuevoDetalleDireccion" type="text" placeholder="Detalle de la dirección" />
         <input id="nuevoDistrito" type="text" placeholder="Distrito" />
         <input id="nuevoTelefono" type="text" placeholder="Teléfono" />
         <input id="nuevaCategoria" type="text" placeholder="Categoría" />
@@ -74,25 +81,23 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Empresa / Lugar</th>
-              <th>Dirección</th>
+              <th>Empresa</th>
               <th>Distrito</th>
-              <th>Teléfono</th>
-              <th>Categoría</th>
+              <th>Dirección</th>
               <th>Ubicación</th>
+              <th>Categoría</th>
+              <th>Teléfono</th>
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody id="tbody">
-            <!-- Filas generadas por JS -->
-          </tbody>
+          <tbody id="tbody"></tbody>
         </table>
       </div>
       <div id="vacio" class="empty" style="display:none">Sin resultados</div>
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Modal Imagen -->
   <div id="modal">
     <div id="modalContent">
       <span id="cerrarModal">✖</span>
@@ -100,13 +105,32 @@
     </div>
   </div>
 
+  <!-- Modal Dirección -->
+  <div id="modalDireccion">
+    <div id="modalDireccionContent">
+      <span id="cerrarModalDireccion">✖</span>
+      <h3>Detalle de Dirección</h3>
+      <p id="detalleDireccion" style="margin-top:12px; font-size:16px; color:#374151;"></p>
+    </div>
+  </div>
+
   <script>
     const STORAGE_KEY = "misDatos";
-    let datos = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
-      { id: 1, empresa: "Armotec Contratistas", direccion: "Calle Francisco de Toledo 165", distrito: "Surco", telefono: "990297533", categoria: "Construcción", link: "https://maps.app.goo.gl/xxxxx", imagen: "https://via.placeholder.com/300" },
-      { id: 2, empresa: "Farmacia Lima", direccion: "Av. Grau 500", distrito: "Cercado de Lima", telefono: "987654321", categoria: "Salud", link: "https://maps.app.goo.gl/yyyyy", imagen: "https://via.placeholder.com/300" }
+
+    // Datos base que siempre estarán
+    const BASE_DATOS = [
+      { id: 1, empresa: "CBC peruana", direccion: "Huachipa", detalleDireccion: "Los Laureles 127, Lurigancho-Chosica 15457", distrito: "Este Lurigancho", telefono: "990297533", categoria: "Entrega", link: "https://maps.app.goo.gl/YBjWY1vPtzsbBUP76", imagen: "img/cbcPeruana.png" },
+      { id: 2, empresa: "Resemin S.A", direccion: "Urb Inds Sta Rosa", detalleDireccion: "Luis Galvani 392, Lima 15022", distrito: "Este Ate", telefono: "987654321", categoria: "Entrega", link: "https://maps.app.goo.gl/KRvQv7YVbn7MX8mLA", imagen: "img/reseminAte.png" }
     ];
-    function guardarDatos() { localStorage.setItem(STORAGE_KEY, JSON.stringify(datos)); }
+
+    // Cargar datos de localStorage o usar base
+    let datos = [...BASE_DATOS, ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || [])];
+
+    function guardarDatos() {
+      // Guardar solo los que no son base
+      const extras = datos.filter(d => d.id > BASE_DATOS.length);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(extras));
+    }
 
     let filtro = "";
     let editandoId = null;
@@ -115,13 +139,15 @@
     function normalizarTexto(t) {
       return (t ?? "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     }
+
     function coincideRegistro(reg, needle) {
       if (!needle) return true;
       const n = normalizarTexto(needle);
-      return [reg.id, reg.empresa, reg.direccion, reg.distrito, reg.telefono, reg.categoria]
+      return [reg.id, reg.empresa, reg.direccion, reg.detalleDireccion, reg.distrito, reg.telefono, reg.categoria]
         .map(v => normalizarTexto(v))
         .some(v => v.includes(n));
     }
+
     function resaltarCoincidencias(texto, needle) {
       if (!needle) return String(texto);
       const t = String(texto);
@@ -149,13 +175,13 @@
       filtrados.forEach((reg, idx) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${reg.id ?? idx + 1}</td>
+          <td>${reg.id}</td>
           <td><a href="#" class="empresaLink" data-img="${reg.imagen}">${resaltarCoincidencias(reg.empresa, filtro)}</a></td>
-          <td>${resaltarCoincidencias(reg.direccion, filtro)}</td>
           <td>${resaltarCoincidencias(reg.distrito, filtro)}</td>
-          <td>${resaltarCoincidencias(reg.telefono, filtro)}</td>
-          <td>${resaltarCoincidencias(reg.categoria, filtro)}</td>
+          <td><a href="#" class="direccionLink" data-dir="${reg.detalleDireccion}">${resaltarCoincidencias(reg.direccion, filtro)}</a></td>
           <td><a href="${reg.link}" target="_blank">Ver en Maps</a></td>
+          <td>${resaltarCoincidencias(reg.categoria, filtro)}</td>
+          <td>${resaltarCoincidencias(reg.telefono, filtro)}</td>
           <td>
             <button class="btn-secondary btnEditar" data-id="${reg.id}">✏️</button>
             <button class="btn btnEliminar" data-id="${reg.id}">🗑️</button>
@@ -180,36 +206,30 @@
     el("btnAgregar").addEventListener("click", () => {
       const empresa = el("nuevoEmpresa").value.trim();
       const direccion = el("nuevaDireccion").value.trim();
+      const detalleDireccion = el("nuevoDetalleDireccion").value.trim();
       const distrito = el("nuevoDistrito").value.trim();
       const telefono = el("nuevoTelefono").value.trim();
       const categoria = el("nuevaCategoria").value.trim();
       const link = el("nuevoLink").value.trim();
       const imagen = el("nuevaImagen").value.trim();
 
-      if (!empresa || !direccion || !distrito || !telefono || !categoria || !link || !imagen) {
+      if (!empresa || !direccion || !detalleDireccion || !distrito || !telefono || !categoria || !link || !imagen) {
         alert("Completa todos los campos."); return;
       }
 
       if (editandoId) {
         const idx = datos.findIndex(d => d.id === editandoId);
-        datos[idx] = { id: editandoId, empresa, direccion, distrito, telefono, categoria, link, imagen };
+        datos[idx] = { id: editandoId, empresa, direccion, detalleDireccion, distrito, telefono, categoria, link, imagen };
         editandoId = null;
       } else {
         const nextId = (datos.at(-1)?.id ?? 0) + 1;
-        datos.push({ id: nextId, empresa, direccion, distrito, telefono, categoria, link, imagen });
+        datos.push({ id: nextId, empresa, direccion, detalleDireccion, distrito, telefono, categoria, link, imagen });
       }
 
       guardarDatos();
-      el("nuevoEmpresa").value = el("nuevaDireccion").value = el("nuevoDistrito").value =
+      el("nuevoEmpresa").value = el("nuevaDireccion").value = el("nuevoDetalleDireccion").value = el("nuevoDistrito").value =
       el("nuevoTelefono").value = el("nuevaCategoria").value = el("nuevoLink").value = el("nuevaImagen").value = "";
       render();
-    });
-
-    // 🗑️ Borrar todo
-    el("btnBorrar").addEventListener("click", () => {
-      if (confirm("¿Seguro que quieres borrar TODOS los datos guardados?")) {
-        localStorage.removeItem(STORAGE_KEY); datos = []; render();
-      }
     });
 
     // ✏️ Editar
@@ -220,6 +240,7 @@
         if (!registro) return;
         el("nuevoEmpresa").value = registro.empresa;
         el("nuevaDireccion").value = registro.direccion;
+        el("nuevoDetalleDireccion").value = registro.detalleDireccion;
         el("nuevoDistrito").value = registro.distrito;
         el("nuevoTelefono").value = registro.telefono;
         el("nuevaCategoria").value = registro.categoria;
@@ -234,11 +255,24 @@
     document.addEventListener("click", e => {
       if (e.target.classList.contains("btnEliminar")) {
         const id = parseInt(e.target.dataset.id);
+        if (id <= BASE_DATOS.length) {
+          alert("No puedes eliminar un dato base.");
+          return;
+        }
         if (confirm("¿Seguro que quieres eliminar este registro?")) {
           datos = datos.filter(d => d.id !== id);
           guardarDatos();
           render();
         }
+      }
+    });
+
+    // 🗑️ Borrar todo (solo extras)
+    el("btnBorrar").addEventListener("click", () => {
+      if (confirm("¿Seguro que quieres borrar todos los registros agregados?")) {
+        datos = [...BASE_DATOS];
+        localStorage.removeItem(STORAGE_KEY);
+        render();
       }
     });
 
@@ -252,6 +286,17 @@
       }
     });
     el("cerrarModal").addEventListener("click", () => { el("modal").style.display = "none"; });
+
+    // 📍 Modal Dirección
+    document.addEventListener("click", e => {
+      if (e.target.classList.contains("direccionLink")) {
+        e.preventDefault();
+        const detalle = e.target.dataset.dir;
+        el("detalleDireccion").textContent = detalle;
+        el("modalDireccion").style.display = "flex";
+      }
+    });
+    el("cerrarModalDireccion").addEventListener("click", () => { el("modalDireccion").style.display = "none"; });
 
     render();
   </script>
