@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buscador con Tabla</title>
+  <style>
+    :root { font-family: system-ui, Arial, sans-serif; }
+    body { margin: 24px; }
+    .wrap { max-width: 1200px; margin: 0 auto; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    input[type="text"] { padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; }
+    input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+    button { padding: 10px 14px; border: 0; border-radius: 8px; cursor: pointer; }
+    .btn { background: #3b82f6; color: white; }
+    .btn-secondary { background: #0ea5e9; color: white; }
+    .muted { color: #6b7280; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
+    th { background: #f8fafc; }
+    .highlight { background: #fff7cc; }
+    .empty { padding: 16px; text-align: center; color: #6b7280; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Modal */
+    #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
+    #modalContent { position:relative; background:#fff; padding:16px; border-radius:12px; 
+      max-width:90%; max-height:90%; }
+    #modalImg { max-width:100%; max-height:80vh; display:block; margin:auto; border-radius:8px; }
+    #cerrarModal { position:absolute; top:8px; right:12px; cursor:pointer; font-size:20px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Buscador</h1>
+
+    <!-- 🔍 BUSCADOR -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="row">
+        <input id="buscador" type="text" placeholder="Escribe para buscar..." autofocus />
+        <button id="btnLimpiar" class="btn-secondary" title="Limpiar">Limpiar</button>
+        <button id="btnToggleForm" class="btn">➕ Mostrar/Ocultar Formulario</button>
+      </div>
+      <p class="muted" style="margin:8px 0 0">Mostrando resultados para: <strong id="queryDisplay">—</strong></p>
+    </div>
+
+    <!-- ➕ FORMULARIO -->
+    <div id="formularioCard" class="card" style="margin-bottom:16px; display:none;">
+      <h2 style="margin-top:0">Agregar / Editar datos</h2>
+      <div class="row">
+        <input id="nuevoEmpresa" type="text" placeholder="Empresa / Lugar" />
+        <input id="nuevaDireccion" type="text" placeholder="Dirección" />
+        <input id="nuevoDistrito" type="text" placeholder="Distrito" />
+        <input id="nuevoTelefono" type="text" placeholder="Teléfono" />
+        <input id="nuevaCategoria" type="text" placeholder="Categoría" />
+        <input id="nuevoLink" type="text" placeholder="Link de Google Maps" />
+        <input id="nuevaImagen" type="text" placeholder="URL de la imagen" />
+        <button id="btnAgregar" class="btn">Agregar</button>
+        <button id="btnBorrar" class="btn-secondary" title="Borrar todo">🗑️ Borrar todo</button>
+      </div>
+    </div>
+
+    <!-- 📋 RESULTADOS -->
+    <div class="card">
+      <div class="row" style="justify-content: space-between; margin-bottom: 8px;">
+        <h2 style="margin:0">Resultados</h2>
+        <span class="muted" id="conteo">0 items</span>
+      </div>
+      <div style="overflow:auto">
+        <table id="tabla">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Empresa / Lugar</th>
+              <th>Dirección</th>
+              <th>Distrito</th>
+              <th>Teléfono</th>
+              <th>Categoría</th>
+              <th>Ubicación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <!-- Filas generadas por JS -->
+          </tbody>
+        </table>
+      </div>
+      <div id="vacio" class="empty" style="display:none">Sin resultados</div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal">
+    <div id="modalContent">
+      <span id="cerrarModal">✖</span>
+      <img id="modalImg" src="" alt="Vista">
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "misDatos";
+    let datos = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [
+      { id: 1, empresa: "Armotec Contratistas", direccion: "Calle Francisco de Toledo 165", distrito: "Surco", telefono: "990297533", categoria: "Construcción", link: "https://maps.app.goo.gl/xxxxx", imagen: "https://via.placeholder.com/300" },
+      { id: 2, empresa: "Farmacia Lima", direccion: "Av. Grau 500", distrito: "Cercado de Lima", telefono: "987654321", categoria: "Salud", link: "https://maps.app.goo.gl/yyyyy", imagen: "https://via.placeholder.com/300" }
+    ];
+    function guardarDatos() { localStorage.setItem(STORAGE_KEY, JSON.stringify(datos)); }
+
+    let filtro = "";
+    let editandoId = null;
+    const el = (id) => document.getElementById(id);
+
+    function normalizarTexto(t) {
+      return (t ?? "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+    function coincideRegistro(reg, needle) {
+      if (!needle) return true;
+      const n = normalizarTexto(needle);
+      return [reg.id, reg.empresa, reg.direccion, reg.distrito, reg.telefono, reg.categoria]
+        .map(v => normalizarTexto(v))
+        .some(v => v.includes(n));
+    }
+    function resaltarCoincidencias(texto, needle) {
+      if (!needle) return String(texto);
+      const t = String(texto);
+      const n = normalizarTexto(needle);
+      const base = normalizarTexto(t);
+      let res = "", i = 0;
+      while (i < t.length) {
+        if (base.slice(i).startsWith(n)) {
+          res += `<span class="highlight">${t.slice(i, i + needle.length)}</span>`;
+          i += needle.length;
+        } else { res += t[i]; i++; }
+      }
+      return res;
+    }
+
+    function render() {
+      const cuerpo = el("tbody"), vacio = el("vacio"), conteo = el("conteo"), queryDisplay = el("queryDisplay");
+      const filtrados = datos.filter(d => coincideRegistro(d, filtro));
+      conteo.textContent = `${filtrados.length} ${filtrados.length === 1 ? "item" : "items"}`;
+      queryDisplay.textContent = filtro ? `"${filtro}"` : "—";
+      cuerpo.innerHTML = "";
+      if (filtrados.length === 0) { vacio.style.display = "block"; return; } else { vacio.style.display = "none"; }
+
+      const frag = document.createDocumentFragment();
+      filtrados.forEach((reg, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${reg.id ?? idx + 1}</td>
+          <td><a href="#" class="empresaLink" data-img="${reg.imagen}">${resaltarCoincidencias(reg.empresa, filtro)}</a></td>
+          <td>${resaltarCoincidencias(reg.direccion, filtro)}</td>
+          <td>${resaltarCoincidencias(reg.distrito, filtro)}</td>
+          <td>${resaltarCoincidencias(reg.telefono, filtro)}</td>
+          <td>${resaltarCoincidencias(reg.categoria, filtro)}</td>
+          <td><a href="${reg.link}" target="_blank">Ver en Maps</a></td>
+          <td>
+            <button class="btn-secondary btnEditar" data-id="${reg.id}">✏️</button>
+            <button class="btn btnEliminar" data-id="${reg.id}">🗑️</button>
+          </td>
+        `;
+        frag.appendChild(tr);
+      });
+      cuerpo.appendChild(frag);
+    }
+
+    // 🔍 Buscar
+    el("buscador").addEventListener("input", e => { filtro = e.target.value.trim(); render(); });
+    // ❌ Limpiar búsqueda
+    el("btnLimpiar").addEventListener("click", () => { filtro = ""; el("buscador").value = ""; render(); el("buscador").focus(); });
+    // ⏩ Mostrar/Ocultar formulario
+    el("btnToggleForm").addEventListener("click", () => {
+      const formCard = el("formularioCard");
+      formCard.style.display = formCard.style.display === "none" ? "block" : "none";
+    });
+
+    // ➕ / ✏️ Guardar registro
+    el("btnAgregar").addEventListener("click", () => {
+      const empresa = el("nuevoEmpresa").value.trim();
+      const direccion = el("nuevaDireccion").value.trim();
+      const distrito = el("nuevoDistrito").value.trim();
+      const telefono = el("nuevoTelefono").value.trim();
+      const categoria = el("nuevaCategoria").value.trim();
+      const link = el("nuevoLink").value.trim();
+      const imagen = el("nuevaImagen").value.trim();
+
+      if (!empresa || !direccion || !distrito || !telefono || !categoria || !link || !imagen) {
+        alert("Completa todos los campos."); return;
+      }
+
+      if (editandoId) {
+        const idx = datos.findIndex(d => d.id === editandoId);
+        datos[idx] = { id: editandoId, empresa, direccion, distrito, telefono, categoria, link, imagen };
+        editandoId = null;
+      } else {
+        const nextId = (datos.at(-1)?.id ?? 0) + 1;
+        datos.push({ id: nextId, empresa, direccion, distrito, telefono, categoria, link, imagen });
+      }
+
+      guardarDatos();
+      el("nuevoEmpresa").value = el("nuevaDireccion").value = el("nuevoDistrito").value =
+      el("nuevoTelefono").value = el("nuevaCategoria").value = el("nuevoLink").value = el("nuevaImagen").value = "";
+      render();
+    });
+
+    // 🗑️ Borrar todo
+    el("btnBorrar").addEventListener("click", () => {
+      if (confirm("¿Seguro que quieres borrar TODOS los datos guardados?")) {
+        localStorage.removeItem(STORAGE_KEY); datos = []; render();
+      }
+    });
+
+    // ✏️ Editar
+    document.addEventListener("click", e => {
+      if (e.target.classList.contains("btnEditar")) {
+        const id = parseInt(e.target.dataset.id);
+        const registro = datos.find(d => d.id === id);
+        if (!registro) return;
+        el("nuevoEmpresa").value = registro.empresa;
+        el("nuevaDireccion").value = registro.direccion;
+        el("nuevoDistrito").value = registro.distrito;
+        el("nuevoTelefono").value = registro.telefono;
+        el("nuevaCategoria").value = registro.categoria;
+        el("nuevoLink").value = registro.link;
+        el("nuevaImagen").value = registro.imagen;
+        editandoId = id;
+        el("formularioCard").style.display = "block";
+      }
+    });
+
+    // 🗑️ Eliminar fila
+    document.addEventListener("click", e => {
+      if (e.target.classList.contains("btnEliminar")) {
+        const id = parseInt(e.target.dataset.id);
+        if (confirm("¿Seguro que quieres eliminar este registro?")) {
+          datos = datos.filter(d => d.id !== id);
+          guardarDatos();
+          render();
+        }
+      }
+    });
+
+    // 🖼️ Modal imagen
+    document.addEventListener("click", e => {
+      if (e.target.classList.contains("empresaLink")) {
+        e.preventDefault();
+        const img = e.target.dataset.img;
+        el("modalImg").src = img;
+        el("modal").style.display = "flex";
+      }
+    });
+    el("cerrarModal").addEventListener("click", () => { el("modal").style.display = "none"; });
+
+    render();
+  </script>
+</body>
+</html>
