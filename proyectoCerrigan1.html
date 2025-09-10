@@ -138,8 +138,11 @@ th, td {
   const STORAGE_KEY = "misDatos";
 
   const BASE_DATOS = [
-    { id: 1, empresa: "CBC peruana", direccion: "Huachipa", detalleDireccion: "Los Laureles 127, Lurigancho-Chosica 15457", distrito: "Este Lurigancho", telefono: "990297533", categoria: "Entrega", link: "https://maps.app.goo.gl/YBjWY1vPtzsbBUP76", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/cbcPeruana.png?raw=true", horario: "Lun-Vie 8am-6pm" },
-    { id: 2, empresa: "Resemin S.A", direccion: "Urb Inds Sta Rosa", detalleDireccion: "Luis Galvani 392, Lima 15022", distrito: "Este Ate", telefono: "987654321", categoria: "Entrega", link: "https://maps.app.goo.gl/KRvQv7YVbn7MX8mLA", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/reseminAte.png?raw=true", horario: "Lun-Sab 9am-5pm" }
+    { id: 1, empresa: "CBC peruana", direccion: "Huachipa", detalleDireccion: "Los Laureles 127, Lurigancho-Chosica 15457", distrito: "Este Lurigancho", telefono: "990297533", categoria: "Entrega", link: "https://maps.app.goo.gl/YBjWY1vPtzsbBUP76", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/cbcPeruana.png?raw=true", horario: "3pm" },
+    { id: 2, empresa: "Resemin S.A", direccion: "Urb Inds Sta Rosa", detalleDireccion: "Luis Galvani 392, Lima 15022", distrito: "Este Ate", telefono: "987654321", categoria: "Entrega", link: "https://maps.app.goo.gl/KRvQv7YVbn7MX8mLA", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/reseminAte.png?raw=true", horario: "Lun-Sab 9am-5pm" },
+    { id: 3, empresa: "Caliza inka", direccion: "Huachipa", detalleDireccion: "Sub Lote, Av. Cajamarquilla 2C, Lurigancho-Chosica", distrito: "Este Lurigancho", telefono: "-", categoria: "Empresa", link: "https://maps.app.goo.gl/XX6wbq553ud4aNWc6", imagen: "-", horario: "3pm" },
+    { id: 4, empresa: "Resemin Priale", direccion: "Huachipa", detalleDireccion: "Av. Huachipa 215, Lima 15457", distrito: "Este Lurigancho", telefono: "-", categoria: "Entrega", link: "https://maps.app.goo.gl/HV4WRc8MiC3iArb3A", imagen: "-", horario: "3pm" },
+    { id: 5, empresa: "Depositos Químicos", direccion: "-", detalleDireccion: "-", distrito: "Callao", telefono: "-", categoria: "Entrega", link: "-", imagen: "-", horario: "-" }  
   ];
 
   let datos = [...BASE_DATOS, ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || [])];
