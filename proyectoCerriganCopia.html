@@ -10,8 +10,8 @@
     .wrap { max-width: 1200px; margin: 0 auto; }
     .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
     .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    input[type="text"] { padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; }
-    input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+    input[type="text"], textarea { padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; }
+    input[type="text"]:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
     button { padding: 6px 8px; border: 0; border-radius: 8px; cursor: pointer; margin: 1px }
     .btn { background: #3b82f6; color: white; }
     .btn-secondary { background: #0ea5e9; color: white; }
@@ -23,7 +23,6 @@
     .empty { padding: 16px; text-align: center; color: #6b7280; }
     a { color: #2563eb; text-decoration: none; }
     a:hover { text-decoration: underline; }
-
     /* Modal Imagen */
     #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
       background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
@@ -31,13 +30,14 @@
       max-width:90%; max-height:90%; }
     #modalImg { max-width:100%; max-height:80vh; display:block; margin:auto; border-radius:8px; }
     #cerrarModal {  position:absolute; top:8px; right:12px; cursor:pointer; font-size:22px; font-weight:bold; color:#555; background:none; border:none; }
-
     /* Modal Dirección */
     #modalDireccion { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
       background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
-    #modalDireccionContent { background:#fff; padding:16px; border-radius:12px; max-width:500px; width:90%; position:relative; }
-    #cerrarModalDireccion { position:absolute; top:8px; right:12px; cursor:pointer; font-size:20px; }
+    #modalDireccionContent { background:#fff; padding:16px; border-radius:12px; max-width:600px; width:92%; position:relative; }
+    #cerrarModalDireccion { position:absolute; top:8px; right:12px; cursor:pointer; font-size:20px; background:none; border:none; }
     #detalleDireccion { margin-top: 12px; font-size: 16px; color: #374151; white-space: pre-line; }
+    .small-input { width: 180px; }
+    textarea { width:100%; resize:vertical; min-height:64px; }
   </style>
 </head>
 <body>
@@ -52,6 +52,26 @@
         <button id="btnToggleForm" class="btn">➕ Mostrar/Ocultar Formulario</button>
       </div>
       <p class="muted" style="margin:8px 0 0">Mostrando resultados para: <strong id="queryDisplay">—</strong></p>
+    </div>
+
+    <!-- ➕ FORMULARIO -->
+    <div id="formularioCard" class="card" style="margin-bottom:16px; display:none;">
+      <h2 style="margin-top:0">Agregar / Editar datos</h2>
+      <div class="row" style="align-items:flex-start;">
+        <input id="nuevoEmpresa" type="text" placeholder="Empresa / Lugar" class="small-input" />
+        <input id="nuevaDireccion" type="text" placeholder="Dirección corta" class="small-input" />
+        <input id="nuevoDistrito" type="text" placeholder="Distrito" class="small-input" />
+        <input id="nuevoTelefono" type="text" placeholder="Teléfono" class="small-input" />
+        <input id="nuevaCategoria" type="text" placeholder="Categoría" class="small-input" />
+        <input id="nuevoHorario" type="text" placeholder="Horario de atención" class="small-input" />
+        <input id="nuevoLink" type="text" placeholder="Link de Google Maps" style="flex:1 1 100%;" />
+        <input id="nuevaImagen" type="text" placeholder="URL de la imagen" style="flex:1 1 100%;" />
+        <textarea id="nuevoDetalleDireccion" placeholder="Detalle de la dirección (enter funciona)"></textarea>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button id="btnAgregar" class="btn">Agregar / Guardar</button>
+          <button id="btnBorrar" class="btn-secondary" title="Borrar todo">🗑️ Borrar todo</button>
+        </div>
+      </div>
     </div>
 
     <!-- 📋 RESULTADOS -->
@@ -85,7 +105,7 @@
   <!-- Modal Imagen -->
   <div id="modal">
     <div id="modalContent">
-      <span id="cerrarModal">✖</span>
+      <button id="cerrarModal">✖</button>
       <img id="modalImg" src="" alt="Vista">
     </div>
   </div>
@@ -93,7 +113,7 @@
   <!-- Modal Dirección -->
   <div id="modalDireccion">
     <div id="modalDireccionContent">
-      <span id="cerrarModalDireccion">✖</span>
+      <button id="cerrarModalDireccion">✖</button>
       <h3>Detalle de Dirección</h3>
       <p id="detalleDireccion"></p>
     </div>
@@ -104,13 +124,16 @@
 
   const BASE_DATOS = [
     { id: 1, empresa: "CBC peruana", direccion: "Huachipa", detalleDireccion: "Los Laureles 127, Lurigancho-Chosica 15457", distrito: "Este Lurigancho", telefono: "990297533", categoria: "Entrega", link: "https://maps.app.goo.gl/YBjWY1vPtzsbBUP76", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/cbcPeruana.png?raw=true", horario: "3pm" },
-    { id: 2, empresa: "Resemin S.A", direccion: "Urb Inds Sta Rosa", detalleDireccion: "Luis Galvani 392, Lima 15022", distrito: "Este Ate", telefono: "987654321", categoria: "Entrega", link: "https://maps.app.goo.gl/KRvQv7YVbn7MX8mLA", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/reseminAte.png?raw=true", horario: "Lun-Sab 9am-5pm" }
+    { id: 2, empresa: "Resemin S.A", direccion: "Urb Inds Sta Rosa", detalleDireccion: "Luis Galvani 392, Lima 15022", distrito: "Este Ate", telefono: "987654321", categoria: "Entrega", link: "https://maps.app.goo.gl/KRvQv7YVbn7MX8mLA", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/reseminAte.png?raw=true", horario: "Lun-Sab 9am-5pm" },
+    { id: 3, empresa: "Caliza inka", direccion: "Huachipa", detalleDireccion: "Sub Lote, Av. Cajamarquilla 2C, Lurigancho-Chosica", distrito: "Este Lurigancho", telefono: "-", categoria: "Empresa", link: "https://maps.app.goo.gl/XX6wbq553ud4aNWc6", imagen: "-", horario: "3pm" },
+    { id: 4, empresa: "Resemin Priale", direccion: "Huachipa", detalleDireccion: "Av. Huachipa 215, Lima 15457", distrito: "Este Lurigancho", telefono: "-", categoria: "Entrega", link: "https://maps.app.goo.gl/HV4WRc8MiC3iArb3A", imagen: "-", horario: "3pm" }
   ];
 
   let datos = [...BASE_DATOS, ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || [])];
   let filtro = "";
+  let editandoId = null;
 
-  const el = (id) => document.getElementById(id);
+  const el = id => document.getElementById(id);
 
   function normalizarTexto(t) {
     return (t ?? "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -124,7 +147,7 @@
       .some(v => v.includes(n));
   }
 
-  // 🔹 Para texto plano
+  // Para texto plano (retorna HTML seguro con <span>)
   function resaltarCoincidencias(texto, needle) {
     if (!needle) return String(texto);
     const t = String(texto);
@@ -140,15 +163,13 @@
     return res;
   }
 
-  // 🔹 Para enlaces (<a>)
+  // Para enlaces/nodos: construye nodos sin romper atributos ni eventos
   function resaltarCoincidenciasNodo(elemento, texto, needle) {
     elemento.innerHTML = "";
     if (!needle) { elemento.textContent = texto; return; }
-
     const base = normalizarTexto(texto);
     const n = normalizarTexto(needle);
     let i = 0;
-
     while (i < texto.length) {
       if (base.slice(i).startsWith(n)) {
         const span = document.createElement("span");
@@ -163,6 +184,11 @@
     }
   }
 
+  function guardarDatos() {
+    const extras = datos.filter(d => d.id > BASE_DATOS.length);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(extras));
+  }
+
   function render() {
     const cuerpo = el("tbody"), vacio = el("vacio"), conteo = el("conteo"), queryDisplay = el("queryDisplay");
     const filtrados = datos.filter(d => coincideRegistro(d, filtro));
@@ -172,57 +198,165 @@
     if (filtrados.length === 0) { vacio.style.display = "block"; return; } else { vacio.style.display = "none"; }
 
     const frag = document.createDocumentFragment();
-    filtrados.forEach((reg) => {
+    filtrados.forEach(reg => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${reg.id}</td>
-        <td><a href="#" class="empresaLink" data-img="${reg.imagen}"></a></td>
-        <td>${resaltarCoincidencias(reg.distrito, filtro)}</td>
-        <td><a href="#" class="direccionLink" data-dir="${reg.detalleDireccion}"></a></td>
-        <td><a href="${reg.link}" target="_blank">Ver en Maps</a></td>
-        <td>${resaltarCoincidencias(reg.categoria, filtro)}</td>
-        <td>${resaltarCoincidencias(reg.horario ?? "—", filtro)}</td>
-        <td>${resaltarCoincidencias(reg.telefono, filtro)}</td>
+        <td><a href="#" class="empresaLink" data-img="${reg.imagen}" aria-label="Empresa ${reg.empresa}"></a></td>
+        <td class="td-distrito"></td>
+        <td><a href="#" class="direccionLink" data-dir="${reg.detalleDireccion}" aria-label="Dirección ${reg.direccion}"></a></td>
+        <td><a href="${reg.link}" target="_blank" rel="noopener noreferrer">Ver en Maps</a></td>
+        <td class="td-categoria"></td>
+        <td class="td-horario"></td>
+        <td class="td-telefono"></td>
         <td>
-          <button class="btn-secondary">✏️</button>
-          <button class="btn">🗑️</button>
+          <button class="btn-secondary btnEditar" data-id="${reg.id}">✏️</button>
+          <button class="btn btnEliminar" data-id="${reg.id}">🗑️</button>
         </td>
       `;
 
-      // Aplicar resaltado en <a>
-      resaltarCoincidenciasNodo(tr.querySelector(".empresaLink"), reg.empresa, filtro);
-      resaltarCoincidenciasNodo(tr.querySelector(".direccionLink"), reg.direccion, filtro);
+      // Resaltar en nodos <a> (sin romper atributos)
+      const linkEmpresa = tr.querySelector(".empresaLink");
+      resaltarCoincidenciasNodo(linkEmpresa, reg.empresa, filtro);
+
+      const linkDireccion = tr.querySelector(".direccionLink");
+      resaltarCoincidenciasNodo(linkDireccion, reg.direccion, filtro);
+
+      // Resaltar en celdas de texto (se usa innerHTML intencionadamente para spans)
+      tr.querySelector(".td-distrito").innerHTML = resaltarCoincidencias(reg.distrito, filtro);
+      tr.querySelector(".td-categoria").innerHTML = resaltarCoincidencias(reg.categoria, filtro);
+      tr.querySelector(".td-horario").innerHTML = resaltarCoincidencias(reg.horario ?? "—", filtro);
+      tr.querySelector(".td-telefono").innerHTML = resaltarCoincidencias(reg.telefono, filtro);
 
       frag.appendChild(tr);
     });
     cuerpo.appendChild(frag);
   }
 
+  // Eventos básicos UI
   el("buscador").addEventListener("input", e => { filtro = e.target.value.trim(); render(); });
   el("btnLimpiar").addEventListener("click", () => { filtro = ""; el("buscador").value = ""; render(); el("buscador").focus(); });
 
-  // Modal imagen
-  document.addEventListener("click", e => {
-    if (e.target.closest(".empresaLink")) {
-      e.preventDefault();
-      const link = e.target.closest(".empresaLink");
-      el("modalImg").src = link.dataset.img;
-      el("modal").style.display = "flex";
-    }
+  el("btnToggleForm").addEventListener("click", () => {
+    const formCard = el("formularioCard");
+    formCard.style.display = formCard.style.display === "none" ? "block" : "none";
   });
-  el("cerrarModal").addEventListener("click", () => { el("modal").style.display = "none"; });
 
-  // Modal dirección
+  // Añadir / Guardar
+  el("btnAgregar").addEventListener("click", () => {
+    const empresa = el("nuevoEmpresa").value.trim();
+    const direccion = el("nuevaDireccion").value.trim();
+    const detalleDireccion = el("nuevoDetalleDireccion").value.trim();
+    const distrito = el("nuevoDistrito").value.trim();
+    const telefono = el("nuevoTelefono").value.trim();
+    const categoria = el("nuevaCategoria").value.trim();
+    const link = el("nuevoLink").value.trim();
+    const imagen = el("nuevaImagen").value.trim();
+    const horario = el("nuevoHorario").value.trim();
+
+    if (!empresa || !direccion || !detalleDireccion || !distrito || !telefono || !categoria || !link || !imagen || !horario) {
+      alert("Completa todos los campos.");
+      return;
+    }
+
+    if (editandoId) {
+      const idx = datos.findIndex(d => d.id === editandoId);
+      if (idx >= 0) {
+        datos[idx] = { id: editandoId, empresa, direccion, detalleDireccion, distrito, telefono, categoria, link, imagen, horario };
+      }
+      editandoId = null;
+    } else {
+      const nextId = (datos.at(-1)?.id ?? 0) + 1;
+      datos.push({ id: nextId, empresa, direccion, detalleDireccion, distrito, telefono, categoria, link, imagen, horario });
+    }
+
+    guardarDatos();
+
+    // limpiar form
+    ["nuevoEmpresa","nuevaDireccion","nuevoDetalleDireccion","nuevoDistrito","nuevoTelefono","nuevaCategoria","nuevoLink","nuevaImagen","nuevoHorario"].forEach(id => el(id).value = "");
+    el("formularioCard").style.display = "none";
+    render();
+  });
+
+  // Borrar todos (solo extras)
+  el("btnBorrar").addEventListener("click", () => {
+    if (!confirm("¿Seguro que quieres borrar todos los registros agregados?")) return;
+    datos = [...BASE_DATOS];
+    localStorage.removeItem(STORAGE_KEY);
+    render();
+  });
+
+  // Delegación de clics para acciones de fila y enlaces
   document.addEventListener("click", e => {
-    if (e.target.closest(".direccionLink")) {
+    // Editar
+    const btnE = e.target.closest(".btnEditar");
+    if (btnE) {
+      const id = Number(btnE.dataset.id);
+      const registro = datos.find(d => d.id === id);
+      if (!registro) return;
+      // llenar form
+      el("nuevoEmpresa").value = registro.empresa;
+      el("nuevaDireccion").value = registro.direccion;
+      el("nuevoDetalleDireccion").value = registro.detalleDireccion;
+      el("nuevoDistrito").value = registro.distrito;
+      el("nuevoTelefono").value = registro.telefono;
+      el("nuevaCategoria").value = registro.categoria;
+      el("nuevoLink").value = registro.link;
+      el("nuevaImagen").value = registro.imagen;
+      el("nuevoHorario").value = registro.horario ?? "";
+      editandoId = id;
+      el("formularioCard").style.display = "block";
+      el("nuevoEmpresa").focus();
+      return;
+    }
+
+    // Eliminar
+    const btnDel = e.target.closest(".btnEliminar");
+    if (btnDel) {
+      const id = Number(btnDel.dataset.id);
+      if (id <= BASE_DATOS.length) {
+        alert("No puedes eliminar un dato base.");
+        return;
+      }
+      if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
+      datos = datos.filter(d => d.id !== id);
+      guardarDatos();
+      render();
+      return;
+    }
+
+    // Modal imagen (empresa)
+    const linkEmpresa = e.target.closest(".empresaLink");
+    if (linkEmpresa) {
       e.preventDefault();
-      const link = e.target.closest(".direccionLink");
-      el("detalleDireccion").textContent = link.dataset.dir;
+      const img = linkEmpresa.dataset.img;
+      el("modalImg").src = img || "";
+      el("modal").style.display = "flex";
+      return;
+    }
+
+    // Modal dirección
+    const linkDireccion = e.target.closest(".direccionLink");
+    if (linkDireccion) {
+      e.preventDefault();
+      const detalle = linkDireccion.dataset.dir;
+      el("detalleDireccion").textContent = detalle || "";
       el("modalDireccion").style.display = "flex";
+      return;
     }
   });
+
+  // Cerrar modales
+  el("cerrarModal").addEventListener("click", () => { el("modal").style.display = "none"; });
   el("cerrarModalDireccion").addEventListener("click", () => { el("modalDireccion").style.display = "none"; });
 
+  // Cerrar modal al hacer click fuera del contenido (opcional y útil)
+  window.addEventListener("click", (e) => {
+    if (e.target === el("modal")) el("modal").style.display = "none";
+    if (e.target === el("modalDireccion")) el("modalDireccion").style.display = "none";
+  });
+
+  // inicializar
   render();
   </script>
 </body>
