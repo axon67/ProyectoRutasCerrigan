@@ -16,17 +16,8 @@
     .btn { background: #3b82f6; color: white; }
     .btn-secondary { background: #0ea5e9; color: white; }
     .muted { color: #6b7280; }
-   table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center; /* Centra el contenido por defecto */
-}
-
-th, td {
-  text-align: center; /* Centra texto en todas las celdas */
-  vertical-align: middle; /* Centra verticalmente */
-  padding: 8px;
-}
+    table { width: 100%; border-collapse: collapse; text-align: center; }
+    th, td { text-align: center; vertical-align: middle; padding: 8px; }
     th { background: #f8fafc; }
     .highlight { background: #fff7cc; }
     .empty { padding: 16px; text-align: center; color: #6b7280; }
@@ -46,14 +37,7 @@ th, td {
       background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
     #modalDireccionContent { background:#fff; padding:16px; border-radius:12px; max-width:500px; width:90%; position:relative; }
     #cerrarModalDireccion { position:absolute; top:8px; right:12px; cursor:pointer; font-size:20px; }
-
-    #detalleDireccion {
-      margin-top: 12px;
-      font-size: 16px;
-      color: #374151;
-      white-space: pre-line; /* 👈 esto hace que funcione el Enter */
-    }
-
+    #detalleDireccion { margin-top: 12px; font-size: 16px; color: #374151; white-space: pre-line; }
   </style>
 </head>
 <body>
@@ -69,25 +53,6 @@ th, td {
       </div>
       <p class="muted" style="margin:8px 0 0">Mostrando resultados para: <strong id="queryDisplay">—</strong></p>
     </div>
-
-     <!-- ➕ FORMULARIO -->
-<div id="formularioCard" class="card" style="margin-bottom:16px; display:none;">
-  <h2 style="margin-top:0">Agregar / Editar datos</h2>
-  <div class="row">
-    <input id="nuevoEmpresa" type="text" placeholder="Empresa / Lugar" />
-    <input id="nuevaDireccion" type="text" placeholder="Dirección corta" />
-    <textarea id="nuevoDetalleDireccion" placeholder="Detalle de la dirección" rows="3" style="padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; width:100%; resize:vertical;"></textarea>
-    <input id="nuevoDistrito" type="text" placeholder="Distrito" />
-    <input id="nuevoTelefono" type="text" placeholder="Teléfono" />
-    <input id="nuevaCategoria" type="text" placeholder="Categoría" />
-    <input id="nuevoLink" type="text" placeholder="Link de Google Maps" />
-    <input id="nuevaImagen" type="text" placeholder="URL de la imagen" />
-    <input id="nuevoHorario" type="text" placeholder="Horario de atención" />
-    <button id="btnAgregar" class="btn">Agregar</button>
-    <button id="btnBorrar" class="btn-secondary" title="Borrar todo">🗑️ Borrar todo</button>
-  </div>
-</div>
-
 
     <!-- 📋 RESULTADOS -->
     <div class="card">
@@ -130,7 +95,7 @@ th, td {
     <div id="modalDireccionContent">
       <span id="cerrarModalDireccion">✖</span>
       <h3>Detalle de Dirección</h3>
-      <p id="detalleDireccion" style="margin-top:12px; font-size:16px; color:#374151;"></p>
+      <p id="detalleDireccion"></p>
     </div>
   </div>
 
@@ -138,14 +103,14 @@ th, td {
   const STORAGE_KEY = "misDatos";
 
   const BASE_DATOS = [
-    { id: 1, empresa: "CBC peruana", direccion: "Huachipa", detalleDireccion: "Los Laureles 127, Lurigancho-Chosica 15457", distrito: "Este Lurigancho", telefono: "990297533", categoria: "Entrega", link: "https://maps.app.goo.gl/YBjWY1vPtzsbBUP76", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/cbcPeruana.png?raw=true", horario: "3pm" },
+        { id: 1, empresa: "CBC peruana", direccion: "Huachipa", detalleDireccion: "Los Laureles 127, Lurigancho-Chosica 15457", distrito: "Este Lurigancho", telefono: "990297533", categoria: "Entrega", link: "https://maps.app.goo.gl/YBjWY1vPtzsbBUP76", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/cbcPeruana.png?raw=true", horario: "3pm" },
     { id: 2, empresa: "Resemin S.A", direccion: "Urb Inds Sta Rosa", detalleDireccion: "Luis Galvani 392, Lima 15022", distrito: "Este Ate", telefono: "987654321", categoria: "Entrega", link: "https://maps.app.goo.gl/KRvQv7YVbn7MX8mLA", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/reseminAte.png?raw=true", horario: "Lun-Sab 9am-5pm" },
     { id: 3, empresa: "Caliza inka", direccion: "Huachipa", detalleDireccion: "Sub Lote, Av. Cajamarquilla 2C, Lurigancho-Chosica", distrito: "Este Lurigancho", telefono: "-", categoria: "Empresa", link: "https://maps.app.goo.gl/XX6wbq553ud4aNWc6", imagen: "-", horario: "3pm" },
     { id: 4, empresa: "Resemin Priale", direccion: "Huachipa", detalleDireccion: "Av. Huachipa 215, Lima 15457", distrito: "Este Lurigancho", telefono: "-", categoria: "Entrega", link: "https://maps.app.goo.gl/HV4WRc8MiC3iArb3A", imagen: "-", horario: "3pm" },
 
   // empresas de compras
   { id: 5, empresa: "SAMPLAST S.A.C.", direccion: "Av. El Bosque 883", detalleDireccion: "Av. El Bosque 883, Urb. Semi Rústica", distrito: "Este SJL", telefono: "987303111", categoria: "Compras", link: "-", imagen: "-", horario: "10am–12pm / 2–5pm" },
-  { id: 6, empresa: "ROATSA (Roberto A. Tores)", direccion: "Av. Defensores del Morro 222", detalleDireccion: "Av. Defensores del Morro 222", distrito: "Sur Chorrillos", telefono: "965399694", categoria: "Compras", link: "-", imagen: "-", horario: "Lun–Vie 8:30–6pm, Sáb 8:30–12pm" },
+  { id: 6, empresa: "ROATSA", direccion: "Av. Defensores del Morro 222", detalleDireccion: "Av. Defensores del Morro 222", distrito: "Sur Chorrillos", telefono: "965399694", categoria: "Compras", link: "-", imagen: "-", horario: "Lun–Vie 8:30–6pm, Sáb 8:30–12pm" },
   { id: 7, empresa: "MULTIUTILES.COM", direccion: "Jr. Camaná 1103", detalleDireccion: "Jr. Camaná 1103 (Cruce con Uruguay, frente al Ceprevi)", distrito: "Centro Lima", telefono: "998299624", categoria: "Compras", link: "-", imagen: "-", horario: "Lun–Vie 9:05–7:20pm, Sáb 9:30–6:15pm" },
   { id: 9, empresa: "IMPORT SUMARY E.I.R.L.", direccion: "Jr. Paruro 1132", detalleDireccion: "Jr. Paruro 1132", distrito: "Centro Lima", telefono: "962640043", categoria: "Compras", link: "-", imagen: "-", horario: "9:30am–7pm" },
   { id: 10, empresa: "PAZ MENA EDGAR H.", direccion: "Av. Argentina 215", detalleDireccion: "Av. Argentina 215, CC Nicolini, Int AR-4 Pasaje 2", distrito: "Centro Lima", telefono: "994223603", categoria: "Compras", link: "-", imagen: "-", horario: "Lun–Sáb 9–6" },
@@ -171,7 +136,7 @@ th, td {
   
   { id: 28, empresa: "WELDER POWER EIRL", direccion: "Av. Oscar R. Benavides 102", detalleDireccion: "Av. Oscar R. Benavides 102, Plaza 2 de Mayo (Ref: Grifo Repsol)", distrito: "Centro Lima", contacto: "-", telefono: "-", horario: "Hasta las 4PM", categoria: "Compras", link: "-", imagen: "-" },
   { id: 29, empresa: "DISTRIBUIDORA CLEAN TWIST", direccion: "Paseo de la República 788", detalleDireccion: "Paseo de la República 788 Urbanización, La Victoria", distrito: "Centro La Victoria", contacto: "-", telefono: "992906361", horario: "L–V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
-  { id: 30, empresa: "TERRA PLASTIC S.A.", direccion: "Jr. Andahuaylas 1009", detalleDireccion: "Jr. Andahuaylas 1009", distrito: "Centro Lima", contacto: "-", telefono: "994482151", horario: "9AM–7PM", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 30, empresa: "TERRA PLASTIC S.A.", direccion: "Jr. Andahuaylas 1009", detalleDireccion: "Jr. Andahuaylas 1009", distrito: "Centro Lima", contacto: "-", telefono: "994482151", horario: "9AM–7PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/En%20terraplastic%20SACCompras.jpg?raw=true" },
   { id: 31, empresa: "AGROMARKET.PE", direccion: "Calle Alcanfores 1245", detalleDireccion: "Calle Alcanfores 1245 (Larcomar)", distrito: "Sur Miraflores", contacto: "Bruno Cilloniz", telefono: "970125799", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
   { id: 32, empresa: "GRUPO CARLITOS S.A.", direccion: "Jr. Huarochirí 649–653", detalleDireccion: "Jr. Huarochirí 649–653, Malvinas", distrito: "Centro Lima", contacto: "-", telefono: "994035623", horario: "L–V 8AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
   { id: 33, empresa: "GOALSA CENTER S.A.C.", direccion: "Av. Guillermo Dansey 417", detalleDireccion: "Av. Guillermo Dansey 417, 3er piso Tienda 3022–3023, C.C. Plaza Ferretero – Malvinas", distrito: "Centro Lima", contacto: "-", telefono: "999329541 / 969472462", horario: "L–V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
@@ -192,21 +157,20 @@ th, td {
   { id: 48, empresa: "INDUSTRIAL COMERCIAL SANTA ADE", direccion: "Av. Colonial 2463", detalleDireccion: "Av. Colonial 2463, Urb., Lima 15081", distrito: "Centro Cercado Lima", contacto: "Uber Salazar", telefono: "989595313", horario: "L-V 8AM–5:45PM (corr.)", categoria: "Compras", link: "-", imagen: "-" },
   { id: 49, empresa: "WEST VISION", direccion: "Jr. Cuzco 440, Int. 288", detalleDireccion: "Jr. Cuzco 440, Int. 288, Lima", distrito: "Centro Lima", contacto: "Eva S.", telefono: "997307059", horario: "L-V 10:30AM–6PM / S 10:30AM–2PM", categoria: "Compras", link: "-", imagen: "-" },
   { id: 50, empresa: "DASMITEC PERÚ", direccion: "Av. Garcilaso de la Vega 1358, C.C. Plazatec Int. 344", detalleDireccion: "Av. Garcilaso de la Vega 1358, C.C. Plazatec Int. 344, Lima", distrito: "Centro Lima", contacto: "Jacob Rakow", telefono: "935329993", horario: "10AM–6PM", categoria: "Compras", link: "-", imagen: "-" },
-  { id: 51, empresa: "IMPORTACIONES INDUSTRIALES BENDEZU", direccion: "Av. Guillermo Dansey 417, CC Plaza Ferretero, 3er Piso, Tienda 3022–3023", detalleDireccion: "Av. Guillermo Dansey 417, CC Plaza Ferretero, 3er Piso, Tienda 3022–3023, Lima", distrito: "Centro Lima", contacto: "Ericka Álvarez", telefono: "961666472", horario: "L-V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
   { id: 52, empresa: "PRECISUR", direccion: "Av. Morales Duares 1717", detalleDireccion: "Av. Morales Duares 1717, Cercado Lima (Altura Puente Dueñas)", distrito: "Centro Cercado Lima", contacto: "-", telefono: "-", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
   { id: 53, empresa: "CORPORACION EMACIN S.A.C.", direccion: "Av. Ramón Cárcamo 540–542", detalleDireccion: "Av. Ramón Cárcamo 540–542, Lima (Alt. cdra. 6–7 Av. Colonial / Av. Argentina)", distrito: "Centro Lima", contacto: "Alejandro Tam", telefono: "992105254", horario: "L-V 8:30AM–5PM / S 8:30AM–1:30PM", categoria: "Compras", link: "-", imagen: "-" },
-{ id: 54, empresa: "CAJUSOL", direccion: "Pasaje 1 Principal, Tienda Y1-4, CC La Bellota, Av. Dansey 520, Malvinas", detalleDireccion: "Pasaje 1 Principal, Tienda Y1-4, CC La Bellota, Av. Dansey 520, Malvinas, Lima", distrito: "Centro Lima", contacto: "Jan", telefono: "921819283", horario: "L-V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
-{ id: 55, empresa: "FIORELLA REPRESENTACIONES S.A.", direccion: "C. Omicron 215", detalleDireccion: "C. Omicron 215, Callao 07006", distrito: "Oeste Callao", contacto: "Bety", telefono: "946126140", horario: "L-V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 54, empresa: "CAJUSOL", direccion: "Pasj 1 Principal, Tienda Y1-4, La Bellota", detalleDireccion: "Pasaje 1 Principal, Tienda Y1-4, CC La Bellota, Av. Dansey 520, Malvinas, Lima", distrito: "Centro Lima", contacto: "Jan", telefono: "921819283", horario: "L-V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/CajusolCompras.jpg?raw=true" },
+{ id: 55, empresa: "FIORELLA REPRESENTACIONES S.A.", direccion: "C. Omicron 215", detalleDireccion: "C. Omicron 215, Callao 07006", distrito: "Oeste Callao", contacto: "Bety", telefono: "946126140", horario: "L-V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Fiorella%20Representaciones.jpg?raw=true" },
 { id: 56, empresa: "GUILLERMO ROMERO", direccion: "Av. Horacio Urteaga 1156, Oficina 201", detalleDireccion: "Av. Horacio Urteaga 1156, Oficina 201, Jesús María", distrito: "Centro Jesús María", contacto: "-", telefono: "-", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
 { id: 57, empresa: "GRUPO CARLITOS", direccion: "Jr. Huarochirí 649–653, Malvinas", detalleDireccion: "Jr. Huarochirí 649–653, Lima 15082, Malvinas", distrito: "Centro Lima", contacto: "Ricardo", telefono: "994065623", horario: "L-V 9AM–6PM / S 9AM–1PM (corrido)", categoria: "Compras", link: "-", imagen: "-" },
 { id: 58, empresa: "OBRAS FERRETERO", direccion: "-", detalleDireccion: "Lima", distrito: "Centro Lima", contacto: "-", telefono: "958107975", horario: "L-V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
 
-{ id: 59, empresa: "SONEPAR", direccion: "Jr. Yungay 1870", detalleDireccion: "Jr. Yungay 1870, Lima 15081", distrito: "Centro Lima", contacto: "Julio Cortez", telefono: "994019384", horario: "L-V 9AM–6:30PM (corr.) / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 59, empresa: "SONEPAR", direccion: "Jr. Yungay 1870", detalleDireccion: "Jr. Yungay 1870, Lima 15081", distrito: "Centro Lima", contacto: "Julio Cortez", telefono: "994019384", horario: "L-V 9AM–6:30PM (corr.) / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/EnSoneparCompras.jpg?raw=true" },
 { id: 60, empresa: "OHMI IMPORT S.A.", direccion: "Jr. Cusco 829", detalleDireccion: "Jr. Cusco 829, Lima 15001, Centro", distrito: "Centro Lima", contacto: "Raúl", telefono: "977241586", horario: "L-V 8AM–1PM / 2PM–5PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 61, empresa: "GRUPO CARLITOS SOCIEDAD ANONIM", direccion: "Jr. Huarochirí 649-653", detalleDireccion: "Jr. Huarochirí 649-653, Lima 15082, Malvinas", distrito: "Centro Lima", contacto: "Ricardo", telefono: "994065623", horario: "L-V 9AM–6PM / S 9AM–1PM (corr.)", categoria: "Compras", link: "-", imagen: "-" },
 { id: 62, empresa: "DISTRIBUCIONES CLEER", direccion: "Av. Argentina con Colonial", detalleDireccion: "Av. Argentina con Colonial, Lima", distrito: "Centro Lima", contacto: "-", telefono: "947318205", horario: "8AM-1PM / 2PM-5PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 63, empresa: "P & L IMPORTACIONES INDUSTRIAL", direccion: "Jr. Huancavelica 1196, Espaldas del C.C. Unicentro", detalleDireccion: "Jr. Huancavelica 1196, Espaldas del C.C. Unicentro, Cercado de Lima", distrito: "Centro Cercado Lima", contacto: "David", telefono: "905436251", horario: "9AM-5:30PM (Refrig 1-2PM)", categoria: "Compras", link: "-", imagen: "-" },
-{ id: 64, empresa: "TERRA PLASTIC SOCIEDAD ANONIMA", direccion: "Jr. Santa Rosa 1318, Barrios Altos", detalleDireccion: "Jr. Santa Rosa 1318, Barrios Altos, Lima", distrito: "Centro Lima", contacto: "Jeny", telefono: "994482151", horario: "9AM-7PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 64, empresa: "TERRA PLASTIC SOCIEDAD ANONIMA", direccion: "Jr. Santa Rosa 1318, Barrios Altos", detalleDireccion: "Jr. Santa Rosa 1318, Barrios Altos, Lima", distrito: "Centro Lima", contacto: "Jeny", telefono: "994482151", horario: "9AM-7PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/En%20terraplastic%20sociedad%20anonimaCompras.jpg?raw=true" },
 { id: 65, empresa: "PLAN ENTERPRISE S.A.", direccion: "C. José Díaz 426 (por Estadio Nacional)", detalleDireccion: "C. José Díaz 426 (por Estadio Nacional), Lima", distrito: "Centro Lima", contacto: "David", telefono: "947277296", horario: "8AM-5PM (Refrig 1-2PM)", categoria: "Compras", link: "-", imagen: "-" },
 { id: 66, empresa: "CORPORACION ELECTRO INDUSTRIAL", direccion: "Av. Guillermo Dansey 454, CC Nicolini Psj 5 Stand BB-9A", detalleDireccion: "Av. Guillermo Dansey 454, CC Nicolini Psj 5 Stand BB-9A, Lima", distrito: "Centro Lima", contacto: "Jimy", telefono: "950499053", horario: "L-V 8:30-6:30PM, S 8-4PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 67, empresa: "INVERSIONES JENNER", direccion: "Av. Argentina 215 Psj 11 P-15 CC Nicolini", detalleDireccion: "Av. Argentina 215 Psj 11 P-15 CC Nicolini, Lima", distrito: "Centro Lima", contacto: "Jenner", telefono: "922891229", horario: "L-V 9AM-6PM", categoria: "Compras", link: "-", imagen: "-" },
@@ -226,26 +190,19 @@ th, td {
 { id: 91, empresa: "FORUSA S.A.C.", direccion: "Plaza Ferretero o Nicolini", detalleDireccion: "Plaza Ferretero o Nicolini, Lima", distrito: "Centro Lima", contacto: "Javier", telefono: "959096306", horario: "L-V 9AM-6PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 92, empresa: "AYMURAY SAFETY S.A.C.", direccion: "Colonial 419 Interior 3, Portón Plomo", detalleDireccion: "Colonial 419 Interior 3, Portón Plomo, Cercado de Lima", distrito: "Centro Cercado Lima", contacto: "Diego", telefono: "940786398", horario: "Hasta las 6PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 93, empresa: "PROSINFER EIRL", direccion: "C. José Celendon 1072 (Entre Dueñas y Colonial)", detalleDireccion: "C. José Celendon 1072 (Entre Dueñas y Colonial), Lima", distrito: "Centro Lima", contacto: "-", telefono: "918527378", horario: "L-V 9AM-6PM, S 9AM-1PM", categoria: "Compras", link: "-", imagen: "-" },
-{ id: 94, empresa: "BENDEZU", direccion: "Av. Óscar R. Benavides 578", detalleDireccion: "Av. Óscar R. Benavides 578, Lima", distrito: "Centro Lima", contacto: "-", telefono: "970390185", horario: "7AM-5PM", categoria: "Compras", link: "-", imagen: "-" },
-{ id: 95, empresa: "DISTRIBUIDORA Y ABASTECEDOR MAX SAC", direccion: "Av. José Gálvez 120", detalleDireccion: "Av. José Gálvez 120, La Victoria", distrito: "Centro La Victoria", contacto: "-", telefono: "-", horario: "Hasta 8PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 94, empresa: "BENDEZU", direccion: "Av. Óscar R. Benavides 578", detalleDireccion: "Av. Óscar R. Benavides 578, Lima", distrito: "Centro Lima", contacto: "-", telefono: "970390185", horario: "7AM-5PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Bendezu%20Compras.jpg?raw=true" },
+{ id: 95, empresa: "Distribuidora y abastecedora max", direccion: "Av. José Gálvez 120", detalleDireccion: "Av. José Gálvez 120, La Victoria", distrito: "Centro La Victoria", contacto: "-", telefono: "-", horario: "Hasta 8PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Distribuidora%20y%20abastecedora%20Max%20Compras.jpg?raw=true" },
 { id: 96, empresa: "ZITROM PERU EIRL", direccion: "Cal. Valerianias A11 Int 2P, Urb. Santa Rosita", detalleDireccion: "Cal. Valerianias A11 Int 2P, Urb. Santa Rosita, Ate", distrito: "Este Ate", contacto: "-", telefono: "942068938", horario: "10:30AM-1PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 97, empresa: "VICSA SAFETY PERU S.A.C.", direccion: "Av. Santa Rosa 350, Zona Industrial", detalleDireccion: "Av. Santa Rosa 350, Zona Industrial, Ate", distrito: "Este Ate", contacto: "Kevin", telefono: "943258758", horario: "L-V 8AM-5:30PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 98, empresa: "S & H REPRESENTACIONES", direccion: "Av. Garcilaso de la Vega 203, Urb. la Colonial", detalleDireccion: "Av. Garcilaso de la Vega 203, Urb. la Colonial, Callao", distrito: "Oeste Callao", contacto: "-", telefono: "-", horario: "Hasta 5PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 99, empresa: "MULTI TOP S.A.C.", direccion: "Av. Iquitos 670", detalleDireccion: "Av. Iquitos 670, La Victoria 15033", distrito: "Centro La Victoria", contacto: "-", telefono: "987966770", horario: "L-S 8AM-6:30PM, Feriados 9AM-5PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 100, empresa: "GUANTES & GUANTES S.A.", direccion: "Jr. Mcal. Andrés de Sta. Cruz 325, Urb. El Pino", detalleDireccion: "Jr. Mcal. Andrés de Sta. Cruz 325, Urb. El Pino, San Luis", distrito: "Centro San Luis", contacto: "Rosario", telefono: "988570724", horario: "L-V 9AM-1PM / 2PM-"
 }
-
-];
+  ];
 
   let datos = [...BASE_DATOS, ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || [])];
-
-  function guardarDatos() {
-    const extras = datos.filter(d => d.id > BASE_DATOS.length);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(extras));
-  }
-
   let filtro = "";
-  let editandoId = null;
+
   const el = (id) => document.getElementById(id);
 
   function normalizarTexto(t) {
@@ -260,6 +217,7 @@ th, td {
       .some(v => v.includes(n));
   }
 
+  // 🔹 Para texto plano
   function resaltarCoincidencias(texto, needle) {
     if (!needle) return String(texto);
     const t = String(texto);
@@ -275,6 +233,29 @@ th, td {
     return res;
   }
 
+  // 🔹 Para enlaces (<a>)
+  function resaltarCoincidenciasNodo(elemento, texto, needle) {
+    elemento.innerHTML = "";
+    if (!needle) { elemento.textContent = texto; return; }
+
+    const base = normalizarTexto(texto);
+    const n = normalizarTexto(needle);
+    let i = 0;
+
+    while (i < texto.length) {
+      if (base.slice(i).startsWith(n)) {
+        const span = document.createElement("span");
+        span.className = "highlight";
+        span.textContent = texto.slice(i, i + needle.length);
+        elemento.appendChild(span);
+        i += needle.length;
+      } else {
+        elemento.appendChild(document.createTextNode(texto[i]));
+        i++;
+      }
+    }
+  }
+
   function render() {
     const cuerpo = el("tbody"), vacio = el("vacio"), conteo = el("conteo"), queryDisplay = el("queryDisplay");
     const filtrados = datos.filter(d => coincideRegistro(d, filtro));
@@ -288,18 +269,23 @@ th, td {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${reg.id}</td>
-        <td><a href="#" class="empresaLink" data-img="${reg.imagen}">${resaltarCoincidencias(reg.empresa, filtro)}</a></td>
+        <td><a href="#" class="empresaLink" data-img="${reg.imagen}"></a></td>
         <td>${resaltarCoincidencias(reg.distrito, filtro)}</td>
-        <td><a href="#" class="direccionLink" data-dir="${reg.detalleDireccion}">${resaltarCoincidencias(reg.direccion, filtro)}</a></td>
+        <td><a href="#" class="direccionLink" data-dir="${reg.detalleDireccion}"></a></td>
         <td><a href="${reg.link}" target="_blank">Ver en Maps</a></td>
         <td>${resaltarCoincidencias(reg.categoria, filtro)}</td>
         <td>${resaltarCoincidencias(reg.horario ?? "—", filtro)}</td>
         <td>${resaltarCoincidencias(reg.telefono, filtro)}</td>
         <td>
-          <button class="btn-secondary btnEditar" data-id="${reg.id}">✏️</button>
-          <button class="btn btnEliminar" data-id="${reg.id}">🗑️</button>
+          <button class="btn-secondary">✏️</button>
+          <button class="btn">🗑️</button>
         </td>
       `;
+
+      // Aplicar resaltado en <a>
+      resaltarCoincidenciasNodo(tr.querySelector(".empresaLink"), reg.empresa, filtro);
+      resaltarCoincidenciasNodo(tr.querySelector(".direccionLink"), reg.direccion, filtro);
+
       frag.appendChild(tr);
     });
     cuerpo.appendChild(frag);
@@ -307,112 +293,30 @@ th, td {
 
   el("buscador").addEventListener("input", e => { filtro = e.target.value.trim(); render(); });
   el("btnLimpiar").addEventListener("click", () => { filtro = ""; el("buscador").value = ""; render(); el("buscador").focus(); });
-  el("btnToggleForm").addEventListener("click", () => {
-    const formCard = el("formularioCard");
-    formCard.style.display = formCard.style.display === "none" ? "block" : "none";
-  });
 
-  el("btnAgregar").addEventListener("click", () => {
-    const empresa = el("nuevoEmpresa").value.trim();
-    const direccion = el("nuevaDireccion").value.trim();
-    const detalleDireccion = el("nuevoDetalleDireccion").value.trim();
-    const distrito = el("nuevoDistrito").value.trim();
-    const telefono = el("nuevoTelefono").value.trim();
-    const categoria = el("nuevaCategoria").value.trim();
-    const link = el("nuevoLink").value.trim();
-    const imagen = el("nuevaImagen").value.trim();
-    const horario = el("nuevoHorario").value.trim();
-
-    if (!empresa || !direccion || !detalleDireccion || !distrito || !telefono || !categoria || !link || !imagen || !horario) {
-      alert("Completa todos los campos."); return;
-    }
-
-    if (editandoId) {
-      const idx = datos.findIndex(d => d.id === editandoId);
-      datos[idx] = { id: editandoId, empresa, direccion, detalleDireccion, distrito, telefono, categoria, link, imagen, horario };
-      editandoId = null;
-    } else {
-      const nextId = (datos.at(-1)?.id ?? 0) + 1;
-      datos.push({ id: nextId, empresa, direccion, detalleDireccion, distrito, telefono, categoria, link, imagen, horario });
-    }
-
-    guardarDatos();
-    el("nuevoEmpresa").value =
-    el("nuevaDireccion").value =
-    el("nuevoDetalleDireccion").value =
-    el("nuevoDistrito").value =
-    el("nuevoTelefono").value =
-    el("nuevaCategoria").value =
-    el("nuevoLink").value =
-    el("nuevaImagen").value =
-    el("nuevoHorario").value = "";
-    render();
-  });
-
+  // Modal imagen
   document.addEventListener("click", e => {
-    if (e.target.classList.contains("btnEditar")) {
-      const id = parseInt(e.target.dataset.id);
-      const registro = datos.find(d => d.id === id);
-      if (!registro) return;
-      el("nuevoEmpresa").value = registro.empresa;
-      el("nuevaDireccion").value = registro.direccion;
-      el("nuevoDetalleDireccion").value = registro.detalleDireccion;
-      el("nuevoDistrito").value = registro.distrito;
-      el("nuevoTelefono").value = registro.telefono;
-      el("nuevaCategoria").value = registro.categoria;
-      el("nuevoLink").value = registro.link;
-      el("nuevaImagen").value = registro.imagen;
-      el("nuevoHorario").value = registro.horario ?? "";
-      editandoId = id;
-      el("formularioCard").style.display = "block";
-    }
-  });
-
-  document.addEventListener("click", e => {
-    if (e.target.classList.contains("btnEliminar")) {
-      const id = parseInt(e.target.dataset.id);
-      if (id <= BASE_DATOS.length) {
-        alert("No puedes eliminar un dato base.");
-        return;
-      }
-      if (confirm("¿Seguro que quieres eliminar este registro?")) {
-        datos = datos.filter(d => d.id !== id);
-        guardarDatos();
-        render();
-      }
-    }
-  });
-
-  el("btnBorrar").addEventListener("click", () => {
-    if (confirm("¿Seguro que quieres borrar todos los registros agregados?")) {
-      datos = [...BASE_DATOS];
-      localStorage.removeItem(STORAGE_KEY);
-      render();
-    }
-  });
-
-  document.addEventListener("click", e => {
-    if (e.target.classList.contains("empresaLink")) {
+    if (e.target.closest(".empresaLink")) {
       e.preventDefault();
-      const img = e.target.dataset.img;
-      el("modalImg").src = img;
+      const link = e.target.closest(".empresaLink");
+      el("modalImg").src = link.dataset.img;
       el("modal").style.display = "flex";
     }
   });
   el("cerrarModal").addEventListener("click", () => { el("modal").style.display = "none"; });
 
+  // Modal dirección
   document.addEventListener("click", e => {
-    if (e.target.classList.contains("direccionLink")) {
+    if (e.target.closest(".direccionLink")) {
       e.preventDefault();
-      const detalle = e.target.dataset.dir;
-      el("detalleDireccion").textContent = detalle;
+      const link = e.target.closest(".direccionLink");
+      el("detalleDireccion").textContent = link.dataset.dir;
       el("modalDireccion").style.display = "flex";
     }
   });
   el("cerrarModalDireccion").addEventListener("click", () => { el("modalDireccion").style.display = "none"; });
 
   render();
-</script>
-
+  </script>
 </body>
 </html>

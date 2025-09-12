@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buscador con Tabla</title>
+  <style>
+    :root { font-family: system-ui, Arial, sans-serif; }
+    body { margin: 24px; }
+    .wrap { max-width: 1200px; margin: 0 auto; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    input[type="text"] { padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; }
+    input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+    button { padding: 6px 8px; border: 0; border-radius: 8px; cursor: pointer; margin: 1px }
+    .btn { background: #3b82f6; color: white; }
+    .btn-secondary { background: #0ea5e9; color: white; }
+    .muted { color: #6b7280; }
+    table { width: 100%; border-collapse: collapse; text-align: center; }
+    th, td { text-align: center; vertical-align: middle; padding: 8px; }
+    th { background: #f8fafc; }
+    .highlight { background: #fff7cc; }
+    .empty { padding: 16px; text-align: center; color: #6b7280; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Modal Imagen */
+    #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
+    #modalContent { position:relative; background:#fff; padding:16px; border-radius:12px; 
+      max-width:90%; max-height:90%; }
+    #modalImg { max-width:100%; max-height:80vh; display:block; margin:auto; border-radius:8px; }
+    #cerrarModal {  position:absolute; top:8px; right:12px; cursor:pointer; font-size:22px; font-weight:bold; color:#555; background:none; border:none; }
+
+    /* Modal Dirección */
+    #modalDireccion { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
+    #modalDireccionContent { background:#fff; padding:16px; border-radius:12px; max-width:500px; width:90%; position:relative; }
+    #cerrarModalDireccion { position:absolute; top:8px; right:12px; cursor:pointer; font-size:20px; }
+    #detalleDireccion { margin-top: 12px; font-size: 16px; color: #374151; white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Buscador</h1>
+
+    <!-- 🔍 BUSCADOR -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="row">
+        <input id="buscador" type="text" placeholder="Escribe para buscar..." autofocus />
+        <button id="btnLimpiar" class="btn-secondary" title="Limpiar">Limpiar</button>
+        <button id="btnToggleForm" class="btn">➕ Mostrar/Ocultar Formulario</button>
+      </div>
+      <p class="muted" style="margin:8px 0 0">Mostrando resultados para: <strong id="queryDisplay">—</strong></p>
+    </div>
+
+    <!-- 📋 RESULTADOS -->
+    <div class="card">
+      <div class="row" style="justify-content: space-between; margin-bottom: 8px;">
+        <h2 style="margin:0">Resultados</h2>
+        <span class="muted" id="conteo">0 items</span>
+      </div>
+      <div style="overflow:auto">
+        <table id="tabla">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Empresa</th>
+              <th>Distrito</th>
+              <th>Dirección</th>
+              <th>Ubicación</th>
+              <th>Categoría</th>
+              <th>Horario</th>
+              <th>Teléfono</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="vacio" class="empty" style="display:none">Sin resultados</div>
+    </div>
+  </div>
+
+  <!-- Modal Imagen -->
+  <div id="modal">
+    <div id="modalContent">
+      <span id="cerrarModal">✖</span>
+      <img id="modalImg" src="" alt="Vista">
+    </div>
+  </div>
+
+  <!-- Modal Dirección -->
+  <div id="modalDireccion">
+    <div id="modalDireccionContent">
+      <span id="cerrarModalDireccion">✖</span>
+      <h3>Detalle de Dirección</h3>
+      <p id="detalleDireccion"></p>
+    </div>
+  </div>
+
+  <script>
+  const STORAGE_KEY = "misDatos";
+
+  const BASE_DATOS = [
+    { id: 1, empresa: "CBC peruana", direccion: "Huachipa", detalleDireccion: "Los Laureles 127, Lurigancho-Chosica 15457", distrito: "Este Lurigancho", telefono: "990297533", categoria: "Entrega", link: "https://maps.app.goo.gl/YBjWY1vPtzsbBUP76", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/cbcPeruana.png?raw=true", horario: "3pm" },
+    { id: 2, empresa: "Resemin S.A", direccion: "Urb Inds Sta Rosa", detalleDireccion: "Luis Galvani 392, Lima 15022", distrito: "Este Ate", telefono: "987654321", categoria: "Entrega", link: "https://maps.app.goo.gl/KRvQv7YVbn7MX8mLA", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/reseminAte.png?raw=true", horario: "Lun-Sab 9am-5pm" }
+  ];
+
+  let datos = [...BASE_DATOS, ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || [])];
+  let filtro = "";
+
+  const el = (id) => document.getElementById(id);
+
+  function normalizarTexto(t) {
+    return (t ?? "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
+
+  function coincideRegistro(reg, needle) {
+    if (!needle) return true;
+    const n = normalizarTexto(needle);
+    return [reg.id, reg.empresa, reg.direccion, reg.detalleDireccion, reg.distrito, reg.telefono, reg.categoria, reg.horario]
+      .map(v => normalizarTexto(v))
+      .some(v => v.includes(n));
+  }
+
+  // 🔹 Para texto plano
+  function resaltarCoincidencias(texto, needle) {
+    if (!needle) return String(texto);
+    const t = String(texto);
+    const n = normalizarTexto(needle);
+    const base = normalizarTexto(t);
+    let res = "", i = 0;
+    while (i < t.length) {
+      if (base.slice(i).startsWith(n)) {
+        res += `<span class="highlight">${t.slice(i, i + needle.length)}</span>`;
+        i += needle.length;
+      } else { res += t[i]; i++; }
+    }
+    return res;
+  }
+
+  // 🔹 Para enlaces (<a>)
+  function resaltarCoincidenciasNodo(elemento, texto, needle) {
+    elemento.innerHTML = "";
+    if (!needle) { elemento.textContent = texto; return; }
+
+    const base = normalizarTexto(texto);
+    const n = normalizarTexto(needle);
+    let i = 0;
+
+    while (i < texto.length) {
+      if (base.slice(i).startsWith(n)) {
+        const span = document.createElement("span");
+        span.className = "highlight";
+        span.textContent = texto.slice(i, i + needle.length);
+        elemento.appendChild(span);
+        i += needle.length;
+      } else {
+        elemento.appendChild(document.createTextNode(texto[i]));
+        i++;
+      }
+    }
+  }
+
+  function render() {
+    const cuerpo = el("tbody"), vacio = el("vacio"), conteo = el("conteo"), queryDisplay = el("queryDisplay");
+    const filtrados = datos.filter(d => coincideRegistro(d, filtro));
+    conteo.textContent = `${filtrados.length} ${filtrados.length === 1 ? "item" : "items"}`;
+    queryDisplay.textContent = filtro ? `"${filtro}"` : "—";
+    cuerpo.innerHTML = "";
+    if (filtrados.length === 0) { vacio.style.display = "block"; return; } else { vacio.style.display = "none"; }
+
+    const frag = document.createDocumentFragment();
+    filtrados.forEach((reg) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${reg.id}</td>
+        <td><a href="#" class="empresaLink" data-img="${reg.imagen}"></a></td>
+        <td>${resaltarCoincidencias(reg.distrito, filtro)}</td>
+        <td><a href="#" class="direccionLink" data-dir="${reg.detalleDireccion}"></a></td>
+        <td><a href="${reg.link}" target="_blank">Ver en Maps</a></td>
+        <td>${resaltarCoincidencias(reg.categoria, filtro)}</td>
+        <td>${resaltarCoincidencias(reg.horario ?? "—", filtro)}</td>
+        <td>${resaltarCoincidencias(reg.telefono, filtro)}</td>
+        <td>
+          <button class="btn-secondary">✏️</button>
+          <button class="btn">🗑️</button>
+        </td>
+      `;
+
+      // Aplicar resaltado en <a>
+      resaltarCoincidenciasNodo(tr.querySelector(".empresaLink"), reg.empresa, filtro);
+      resaltarCoincidenciasNodo(tr.querySelector(".direccionLink"), reg.direccion, filtro);
+
+      frag.appendChild(tr);
+    });
+    cuerpo.appendChild(frag);
+  }
+
+  el("buscador").addEventListener("input", e => { filtro = e.target.value.trim(); render(); });
+  el("btnLimpiar").addEventListener("click", () => { filtro = ""; el("buscador").value = ""; render(); el("buscador").focus(); });
+
+  // Modal imagen
+  document.addEventListener("click", e => {
+    if (e.target.closest(".empresaLink")) {
+      e.preventDefault();
+      const link = e.target.closest(".empresaLink");
+      el("modalImg").src = link.dataset.img;
+      el("modal").style.display = "flex";
+    }
+  });
+  el("cerrarModal").addEventListener("click", () => { el("modal").style.display = "none"; });
+
+  // Modal dirección
+  document.addEventListener("click", e => {
+    if (e.target.closest(".direccionLink")) {
+      e.preventDefault();
+      const link = e.target.closest(".direccionLink");
+      el("detalleDireccion").textContent = link.dataset.dir;
+      el("modalDireccion").style.display = "flex";
+    }
+  });
+  el("cerrarModalDireccion").addEventListener("click", () => { el("modalDireccion").style.display = "none"; });
+
+  render();
+  </script>
+</body>
+</html>
