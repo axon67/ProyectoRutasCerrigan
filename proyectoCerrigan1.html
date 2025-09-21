@@ -5,39 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Buscador con Tabla</title>
   <style>
-    :root { font-family: system-ui, Arial, sans-serif; }
-    body { margin: 24px; }
-    .wrap { max-width: 1200px; margin: 0 auto; }
-    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
-    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    input[type="text"], textarea { padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; }
-    input[type="text"]:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
-    button { padding: 6px 8px; border: 0; border-radius: 8px; cursor: pointer; margin: 1px }
-    .btn { background: #3b82f6; color: white; }
-    .btn-secondary { background: #0ea5e9; color: white; }
-    .muted { color: #6b7280; }
-    table { width: 100%; border-collapse: collapse; text-align: center; }
-    th, td { text-align: center; vertical-align: middle; padding: 8px; }
-    th { background: #f8fafc; }
-    .highlight { background: #fff7cc; }
-    .empty { padding: 16px; text-align: center; color: #6b7280; }
-    a { color: #2563eb; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    /* Modal Imagen */
-    #modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
-    #modalContent { position:relative; background:#fff; padding:16px; border-radius:12px; 
-      max-width:90%; max-height:90%; }
-    #modalImg { max-width:100%; max-height:80vh; display:block; margin:auto; border-radius:8px; }
-    #cerrarModal {  position:absolute; top:8px; right:12px; cursor:pointer; font-size:22px; font-weight:bold; color:#555; background:none; border:none; }
-    /* Modal Dirección */
-    #modalDireccion { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
-    #modalDireccionContent { background:#fff; padding:16px; border-radius:12px; max-width:600px; width:92%; position:relative; }
-    #cerrarModalDireccion { position:absolute; top:8px; right:12px; cursor:pointer; font-size:20px; background:none; border:none; }
-    #detalleDireccion { margin-top: 12px; font-size: 16px; color: #374151; white-space: pre-line; }
-    .small-input { width: 180px; }
-    textarea { width:100%; resize:vertical; min-height:64px; }
+      :root { font-family: system-ui, Arial, sans-serif; }
+body { margin: 24px; }
+.wrap { max-width: 1200px; margin: 0 auto; }
+.card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+input[type="text"], textarea { padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; }
+input[type="text"]:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
+
+button { padding: 6px 8px; border: 0; border-radius: 8px; cursor: pointer; margin: 1px; }
+.btn { background: #3b82f6; color: white; }
+.btn-secondary { background: #0ea5e9; color: white; }
+.muted { color: #6b7280; }
+
+/* 📋 TABLA */
+table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
+table, th, td { border: 1px solid #e5e7eb; }
+th, td { text-align: center; vertical-align: middle; padding: 2px 4px; line-height: 1.1; }
+th { background: #f8fafc; font-weight: 600; }
+
+.highlight { background: #fff7cc; }
+.empty { padding: 16px; text-align: center; color: #6b7280; }
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 🖼️ Modal Imagen */
+#modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
+#modalContent { position:relative; background:#fff; padding:16px; border-radius:12px; max-width:90%; max-height:90%; }
+#modalImg { max-width:100%; max-height:80vh; display:block; margin:auto; border-radius:8px; }
+#cerrarModal { position:absolute; top:8px; right:12px; cursor:pointer; font-size:22px; font-weight:bold; color:#555; background:none; border:none; }
+
+/* 📍 Modal Dirección */
+#modalDireccion { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
+#modalDireccionContent { background:#fff; padding:16px; border-radius:12px; max-width:600px; width:92%; position:relative; max-height:90vh; overflow-y:auto; }
+#cerrarModalDireccion { position:absolute; top:15px; right:12px; cursor:pointer; font-size:20px; background:none; border:none; }
+#modalDireccionContent h3 { margin-top:0; }
+#modalDireccionContent p { margin:6px 0; }
+#modalDireccionImg { max-width:100%; max-height:60vh; margin-top:12px; border-radius:8px; display:none; object-fit:contain; }
+#modalAcciones { margin-top:12px; display:flex; gap:8px; justify-content:flex-end; }
+
+.small-input { width: 180px; }
+textarea { width:100%; resize:vertical; min-height:64px; }
+
+/* 📌 Card buscador fija */
+.card.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: #fff; /* para que no se mezcle con el fondo al desplazarse */
+}
+
   </style>
 </head>
 <body>
@@ -45,7 +63,7 @@
     <h1>Buscador</h1>
 
     <!-- 🔍 BUSCADOR -->
-    <div class="card" style="margin-bottom:16px">
+    <div class="card sticky" style="margin-bottom:16px">
       <div class="row">
         <input id="buscador" type="text" placeholder="Escribe para buscar..." autofocus />
         <button id="btnLimpiar" class="btn-secondary" title="Limpiar">Limpiar</button>
@@ -86,8 +104,8 @@
             <tr>
               <th>ID</th>
               <th>Empresa</th>
-              <th>Distrito</th>
               <th>Dirección</th>
+              <th>Distrito</th>
               <th>Ubicación</th>
               <th>Categoría</th>
               <th>Horario</th>
@@ -114,14 +132,28 @@
   <div id="modalDireccion">
     <div id="modalDireccionContent">
       <button id="cerrarModalDireccion">✖</button>
-      <h3>Detalle de Dirección</h3>
-      <p id="detalleDireccion"></p>
+      <h3 id="modalEmpresa"></h3>
+      <p><strong>Dirección:</strong> <span id="modalDireccionCorta"></span></p>
+      <p><strong>Distrito:</strong> <span id="modalDistrito"></span></p>
+      <p><strong>Detalle dirección:</strong> <span id="modalDetalleDireccion"></span></p>
+      <p><strong>Ubicación:</strong> <a id="modalLink" href="#" target="_blank">Ver en Maps</a></p>
+      <p><strong>Categoría:</strong> <span id="modalCategoria"></span></p>
+      <p><strong>Horario:</strong> <span id="modalHorario"></span></p>
+      <p><strong>Teléfono:</strong> <span id="modalTelefono"></span></p>
+      <img id="modalDireccionImg" src="" alt="Imagen relacionada">
+      <!-- Botones de acción en el modal -->
+      <div id="modalAcciones">
+        <button id="modalEditar" class="btn-secondary">✏️ Editar</button>
+        <button id="modalEliminar" class="btn">🗑️ Eliminar</button>
+      </div>
     </div>
-  </div>
+</div>
 
-  <script>
+<script>
+  // 🔑 Clave para usar en localStorage
   const STORAGE_KEY = "misDatos";
 
+  // 📦 Datos base (fijos)
   const BASE_DATOS = [
      { id: 1, empresa: "CBC peruana", direccion: "Huachipa", detalleDireccion: "Los Laureles 127, Lurigancho-Chosica 15457", distrito: "Este Lurigancho", telefono: "990297533", categoria: "Entrega", link: "https://maps.app.goo.gl/YBjWY1vPtzsbBUP76", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/cbcPeruana.png?raw=true", horario: "3pm" },
     { id: 2, empresa: "Resemin S.A", direccion: "Urb Inds Sta Rosa", detalleDireccion: "Luis Galvani 392, Lima 15022", distrito: "Este Ate", telefono: "987654321", categoria: "Entrega", link: "https://maps.app.goo.gl/KRvQv7YVbn7MX8mLA", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/reseminAte.png?raw=true", horario: "Lun-Sab 9am-5pm" },
@@ -217,19 +249,22 @@
 { id: 98, empresa: "S & H REPRESENTACIONES", direccion: "Av. Garcilaso de la Vega 203, Urb. la Colonial", detalleDireccion: "Av. Garcilaso de la Vega 203, Urb. la Colonial, Callao", distrito: "Oeste Callao", contacto: "-", telefono: "-", horario: "Hasta 5PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 99, empresa: "MULTI TOP S.A.C.", direccion: "Av. Iquitos 670", detalleDireccion: "Av. Iquitos 670, La Victoria 15033", distrito: "Centro La Victoria", contacto: "-", telefono: "987966770", horario: "L-S 8AM-6:30PM, Feriados 9AM-5PM", categoria: "Compras", link: "-", imagen: "-" },
 { id: 100, empresa: "GUANTES & GUANTES S.A.", direccion: "Calle Mariscal Andres de Sta. Cruz 325, Urb. El Pino", detalleDireccion: "Calle Mariscal Andres de Sta. Cruz 325, San Luis 15022", distrito: "Centro San Luis", contacto: "Rosario", telefono: "988570724", horario: "L-V 9AM-1PM / 2PM-",categoria: "Compras", link: "https://maps.app.goo.gl/Upsu8UVTSeuH83Nh7", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Guantes%20y%20guantesCompras.jpg?raw=true" 
-}
+} 
   ];
 
+  // 📥 Cargar datos desde localStorage (extras) + base
   let datos = [...BASE_DATOS, ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || [])];
   let filtro = "";
   let editandoId = null;
 
   const el = id => document.getElementById(id);
 
+  // Normalizar texto (para buscar sin tildes/mayúsculas)
   function normalizarTexto(t) {
     return (t ?? "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   }
 
+  // Ver si un registro coincide con el filtro
   function coincideRegistro(reg, needle) {
     if (!needle) return true;
     const n = normalizarTexto(needle);
@@ -238,7 +273,7 @@
       .some(v => v.includes(n));
   }
 
-  // Para texto plano (retorna HTML seguro con <span>)
+  // Resaltar coincidencias en texto
   function resaltarCoincidencias(texto, needle) {
     if (!needle) return String(texto);
     const t = String(texto);
@@ -254,7 +289,7 @@
     return res;
   }
 
-  // Para enlaces/nodos: construye nodos sin romper atributos ni eventos
+  // Resaltar coincidencias dentro de enlaces/nodos
   function resaltarCoincidenciasNodo(elemento, texto, needle) {
     elemento.innerHTML = "";
     if (!needle) { elemento.textContent = texto; return; }
@@ -275,11 +310,13 @@
     }
   }
 
+  // 💾 Guardar solo los registros extras en localStorage
   function guardarDatos() {
     const extras = datos.filter(d => d.id > BASE_DATOS.length);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(extras));
   }
 
+  // 🎨 Renderizar la tabla
   function render() {
     const cuerpo = el("tbody"), vacio = el("vacio"), conteo = el("conteo"), queryDisplay = el("queryDisplay");
     const filtrados = datos.filter(d => coincideRegistro(d, filtro));
@@ -287,15 +324,14 @@
     queryDisplay.textContent = filtro ? `"${filtro}"` : "—";
     cuerpo.innerHTML = "";
     if (filtrados.length === 0) { vacio.style.display = "block"; return; } else { vacio.style.display = "none"; }
-
     const frag = document.createDocumentFragment();
     filtrados.forEach(reg => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${reg.id}</td>
         <td><a href="#" class="empresaLink" data-img="${reg.imagen}" aria-label="Empresa ${reg.empresa}"></a></td>
-        <td class="td-distrito"></td>
         <td><a href="#" class="direccionLink" data-dir="${reg.detalleDireccion}" aria-label="Dirección ${reg.direccion}"></a></td>
+        <td class="td-distrito"></td>
         <td><a href="${reg.link}" target="_blank" rel="noopener noreferrer">Ver en Maps</a></td>
         <td class="td-categoria"></td>
         <td class="td-horario"></td>
@@ -305,35 +341,28 @@
           <button class="btn btnEliminar" data-id="${reg.id}">🗑️</button>
         </td>
       `;
-
-      // Resaltar en nodos <a> (sin romper atributos)
       const linkEmpresa = tr.querySelector(".empresaLink");
       resaltarCoincidenciasNodo(linkEmpresa, reg.empresa, filtro);
-
       const linkDireccion = tr.querySelector(".direccionLink");
       resaltarCoincidenciasNodo(linkDireccion, reg.direccion, filtro);
-
-      // Resaltar en celdas de texto (se usa innerHTML intencionadamente para spans)
       tr.querySelector(".td-distrito").innerHTML = resaltarCoincidencias(reg.distrito, filtro);
       tr.querySelector(".td-categoria").innerHTML = resaltarCoincidencias(reg.categoria, filtro);
       tr.querySelector(".td-horario").innerHTML = resaltarCoincidencias(reg.horario ?? "—", filtro);
       tr.querySelector(".td-telefono").innerHTML = resaltarCoincidencias(reg.telefono, filtro);
-
       frag.appendChild(tr);
     });
     cuerpo.appendChild(frag);
   }
 
-  // Eventos básicos UI
+  // 🟦 Eventos buscador
   el("buscador").addEventListener("input", e => { filtro = e.target.value.trim(); render(); });
   el("btnLimpiar").addEventListener("click", () => { filtro = ""; el("buscador").value = ""; render(); el("buscador").focus(); });
-
   el("btnToggleForm").addEventListener("click", () => {
     const formCard = el("formularioCard");
     formCard.style.display = formCard.style.display === "none" ? "block" : "none";
   });
 
-  // Añadir / Guardar
+  // ➕ Agregar / Guardar
   el("btnAgregar").addEventListener("click", () => {
     const empresa = el("nuevoEmpresa").value.trim();
     const direccion = el("nuevaDireccion").value.trim();
@@ -346,8 +375,7 @@
     const horario = el("nuevoHorario").value.trim();
 
     if (!empresa || !direccion || !detalleDireccion || !distrito || !telefono || !categoria || !link || !imagen || !horario) {
-      alert("Completa todos los campos.");
-      return;
+      alert("Completa todos los campos."); return;
     }
 
     if (editandoId) {
@@ -361,31 +389,27 @@
       datos.push({ id: nextId, empresa, direccion, detalleDireccion, distrito, telefono, categoria, link, imagen, horario });
     }
 
-    guardarDatos();
-
-    // limpiar form
+    guardarDatos(); // 💾 se guarda en localStorage
     ["nuevoEmpresa","nuevaDireccion","nuevoDetalleDireccion","nuevoDistrito","nuevoTelefono","nuevaCategoria","nuevoLink","nuevaImagen","nuevoHorario"].forEach(id => el(id).value = "");
     el("formularioCard").style.display = "none";
     render();
   });
 
-  // Borrar todos (solo extras)
+  // 🗑️ Borrar todos los extras
   el("btnBorrar").addEventListener("click", () => {
     if (!confirm("¿Seguro que quieres borrar todos los registros agregados?")) return;
     datos = [...BASE_DATOS];
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_KEY); // 💾 limpiar localStorage
     render();
   });
 
-  // Delegación de clics para acciones de fila y enlaces
+  // ✏️ Delegación de clics (editar, eliminar, modales)
   document.addEventListener("click", e => {
-    // Editar
     const btnE = e.target.closest(".btnEditar");
     if (btnE) {
       const id = Number(btnE.dataset.id);
       const registro = datos.find(d => d.id === id);
       if (!registro) return;
-      // llenar form
       el("nuevoEmpresa").value = registro.empresa;
       el("nuevaDireccion").value = registro.direccion;
       el("nuevoDetalleDireccion").value = registro.detalleDireccion;
@@ -400,23 +424,18 @@
       el("nuevoEmpresa").focus();
       return;
     }
-
-    // Eliminar
     const btnDel = e.target.closest(".btnEliminar");
     if (btnDel) {
       const id = Number(btnDel.dataset.id);
       if (id <= BASE_DATOS.length) {
-        alert("No puedes eliminar un dato base.");
-        return;
+        alert("No puedes eliminar un dato base."); return;
       }
       if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
       datos = datos.filter(d => d.id !== id);
-      guardarDatos();
+      guardarDatos(); // 💾 actualizar localStorage
       render();
       return;
     }
-
-    // Modal imagen (empresa)
     const linkEmpresa = e.target.closest(".empresaLink");
     if (linkEmpresa) {
       e.preventDefault();
@@ -425,30 +444,75 @@
       el("modal").style.display = "flex";
       return;
     }
-
-    // Modal dirección
     const linkDireccion = e.target.closest(".direccionLink");
     if (linkDireccion) {
       e.preventDefault();
-      const detalle = linkDireccion.dataset.dir;
-      el("detalleDireccion").textContent = detalle || "";
+      const id = Number(linkDireccion.closest("tr").children[0].textContent);
+      const registro = datos.find(d => d.id === id);
+      if (!registro) return;
+      el("modalEmpresa").textContent = registro.empresa;
+      el("modalDistrito").textContent = registro.distrito;
+      el("modalDireccionCorta").textContent = registro.direccion;
+      el("modalDetalleDireccion").textContent = registro.detalleDireccion;
+      el("modalLink").href = registro.link || "#";
+      el("modalCategoria").textContent = registro.categoria;
+      el("modalHorario").textContent = registro.horario ?? "—";
+      el("modalTelefono").textContent = registro.telefono;
+      if (registro.imagen && registro.imagen !== "-") {
+        el("modalDireccionImg").src = registro.imagen;
+        el("modalDireccionImg").style.display = "block";
+      } else {
+        el("modalDireccionImg").style.display = "none";
+      }
+      el("modalDireccionContent").dataset.id = id;
       el("modalDireccion").style.display = "flex";
       return;
     }
   });
 
-  // Cerrar modales
+  // Botones del modal (editar / eliminar desde modal)
+  el("modalEditar").addEventListener("click", () => {
+    const id = Number(el("modalDireccionContent").dataset.id);
+    const registro = datos.find(d => d.id === id);
+    if (!registro) return;
+    el("nuevoEmpresa").value = registro.empresa;
+    el("nuevaDireccion").value = registro.direccion;
+    el("nuevoDetalleDireccion").value = registro.detalleDireccion;
+    el("nuevoDistrito").value = registro.distrito;
+    el("nuevoTelefono").value = registro.telefono;
+    el("nuevaCategoria").value = registro.categoria;
+    el("nuevoLink").value = registro.link;
+    el("nuevaImagen").value = registro.imagen;
+    el("nuevoHorario").value = registro.horario ?? "";
+    editandoId = id;
+    el("formularioCard").style.display = "block";
+    el("nuevoEmpresa").focus();
+    el("modalDireccion").style.display = "none";
+  });
+
+  el("modalEliminar").addEventListener("click", () => {
+    const id = Number(el("modalDireccionContent").dataset.id);
+    if (id <= BASE_DATOS.length) {
+      alert("No puedes eliminar un dato base."); return;
+    }
+    if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
+    datos = datos.filter(d => d.id !== id);
+    guardarDatos(); // 💾 actualizar localStorage
+    render();
+    el("modalDireccion").style.display = "none";
+  });
+
+  // ❌ Cerrar modales
   el("cerrarModal").addEventListener("click", () => { el("modal").style.display = "none"; });
   el("cerrarModalDireccion").addEventListener("click", () => { el("modalDireccion").style.display = "none"; });
-
-  // Cerrar modal al hacer click fuera del contenido (opcional y útil)
   window.addEventListener("click", (e) => {
     if (e.target === el("modal")) el("modal").style.display = "none";
     if (e.target === el("modalDireccion")) el("modalDireccion").style.display = "none";
   });
 
-  // inicializar
+  // 🚀 Inicializar
   render();
-  </script>
+</script>
+
 </body>
 </html>
