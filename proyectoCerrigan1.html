@@ -1,407 +1,518 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fondo oscuro con estrellas fugaces ✨</title>
-<style>
-  :root{
-    --bg:#02030a;         /* negro azulado profundo */
-    --glow:#ffd54f;       /* amarillo suave */
-    --gold:#ffc107;       /* amarillo brillante */
-  }
-  html,body{height:100%; margin:0;}
-  body{
-    background:
-      radial-gradient(1200px 800px at 70% 20%, rgba(255,213,79,.06), rgba(0,0,0,0)),
-      radial-gradient(900px 600px at 25% 75%, rgba(255,193,7,.05), rgba(0,0,0,0)),
-      var(--bg);
-    overflow:hidden;
-    color:#eaeaea;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buscador con Tabla</title>
+  <style>
+      :root { font-family: system-ui, Arial, sans-serif; }
+body { margin: 24px; }
+.wrap { max-width: 1200px; margin: 0 auto; }
+.card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
-  /* ---------- Título en encabezado ---------- */
-  header {
-    position:fixed;
-    top:20px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:3;
-    text-align:center;
-  }
-  header h3 {
-    margin:0;
-    font-size:1.4rem;
-    font-weight:600;
-    color:#fff;
-    text-shadow: 
-      0 0 6px rgba(255,255,255,0.9),
-      0 0 14px rgba(200,200,255,0.75),
-      0 0 22px rgba(255,213,79,0.55);
-    letter-spacing:1px;
-    margin-top:40px;
-  }
+input[type="text"], textarea { padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; }
+input[type="text"]:focus, textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
 
-  /* Sutil viñeta para aumentar contraste */
-  body::after{
-    content:"";
-    position:fixed; inset:0;
-    pointer-events:none;
-    background: radial-gradient(1000px 1000px at 50% 50%, transparent 60%, rgba(0,0,0,.35) 100%);
-    mix-blend-mode:multiply;
-  }
+button { padding: 6px 8px; border: 0; border-radius: 8px; cursor: pointer; margin: 1px; }
+.btn { background: #3b82f6; color: white; }
+.btn-secondary { background: #0ea5e9; color: white; }
+.muted { color: #6b7280; }
 
-  canvas{position:fixed; inset:0; width:100%; height:100%; display:block;}
+/* 📋 TABLA */
+table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
+table, th, td { border: 1px solid #e5e7eb; }
+th, td { text-align: center; vertical-align: middle; padding: 2px 4px; line-height: 1.1; }
+th { background: #f8fafc; font-weight: 600; }
 
-  .hud{position:fixed; right:16px; top:16px; display:flex; gap:8px; align-items:center; z-index:2}
-  .btn{
-    background: rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.14);
-    padding:10px 12px; border-radius:12px; cursor:pointer; user-select:none;
-    backdrop-filter: blur(4px);
-    transition: transform .15s ease, background .2s ease, border-color .2s ease;
-    font-weight:600; letter-spacing:.2px; color:#f4f4f5;
-  }
-  .btn:hover{ transform: translateY(-1px); background:rgba(255,255,255,.10); }
-  .toggle.on{ border-color: rgba(255,193,7,.8); box-shadow: 0 0 24px 4px rgba(255,193,7,.18) inset; }
+.highlight { background: #fff7cc; }
+.empty { padding: 16px; text-align: center; color: #6b7280; }
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-  .brand{position:fixed; left:16px; bottom:16px; opacity:.55; font-size:12px; letter-spacing:.3px; z-index:1}
+/* 🖼️ Modal Imagen */
+#modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
+#modalContent { position:relative; background:#fff; padding:16px; border-radius:12px; max-width:90%; max-height:90%; }
+#modalImg { max-width:100%; max-height:80vh; display:block; margin:auto; border-radius:8px; }
+#cerrarModal { position:absolute; top:8px; right:12px; cursor:pointer; font-size:22px; font-weight:bold; color:#555; background:none; border:none; }
 
-  /* Imagen central */
-  .centerpiece{position:fixed; inset:0; display:grid; place-items:center; z-index:1; pointer-events:none}
-  .centerpiece img{width:min(70vmin, 420px); height:auto; filter: drop-shadow(0 0 24px rgba(255,193,7,.35)) drop-shadow(0 0 64px rgba(255,193,7,.08)); transition: opacity .6s ease}
-  .centerpiece img.is-fading{opacity:0}
+/* 📍 Modal Dirección */
+#modalDireccion { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
+#modalDireccionContent { background:#fff; padding:16px; border-radius:12px; max-width:600px; width:92%; position:relative; max-height:90vh; overflow-y:auto; }
+#cerrarModalDireccion { position:absolute; top:15px; right:12px; cursor:pointer; font-size:20px; background:none; border:none; }
+#modalDireccionContent h3 { margin-top:0; }
+#modalDireccionContent p { margin:6px 0; }
+#modalDireccionImg { max-width:100%; max-height:60vh; margin-top:12px; border-radius:8px; display:none; object-fit:contain; }
+#modalAcciones { margin-top:12px; display:flex; gap:8px; justify-content:flex-end; }
 
-  /* Botón circular de audio (play/mute) */
-  .audioBtn {
-    position: fixed;
-    left: 50%;
-    bottom: 43px; /* subido 15px */
-    transform: translateX(-50%);
-    z-index: 4;
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    display: grid; place-items: center;
-    cursor: pointer; user-select: none;
-    background: radial-gradient(90px 90px at 50% 45%, rgba(255,255,200,0.35), rgba(0,0,0,0.45));
-    border: 1px solid rgba(255,255,255,0.65);
-    box-shadow: 
-      0 0 20px rgba(255,255,180,0.55), 
-      0 0 40px rgba(200,200,255,0.35), 
-      inset 0 0 22px rgba(255,255,200,0.35);
-    backdrop-filter: blur(8px);
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
-  }
-  .audioBtn:hover {
-    transform: translateX(-50%) translateY(-2px);
-    box-shadow: 
-      0 0 28px rgba(255,255,220,0.75), 
-      0 0 60px rgba(180,200,255,0.45), 
-      inset 0 0 28px rgba(255,255,200,0.45);
-  }
-  .audioBtn svg {
-    width: 28px; height: 28px;
-    fill:#fff;
-    filter: drop-shadow(0 0 8px rgba(255,255,220,0.75));
-  }
-  .audioBtn.muted{
-    border-color: rgba(230,240,255,.95); 
-    background: radial-gradient(90px 90px at 50% 45%, rgba(240,250,255,.75), rgba(0,0,0,.35)); 
-    box-shadow: 
-      0 0 32px rgba(220,235,255,.95), 
-      0 0 70px rgba(200,225,255,.75), 
-      inset 0 0 32px rgba(240,250,255,.65);
-  }
+.small-input { width: 180px; }
+textarea { width:100%; resize:vertical; min-height:64px; }
 
-  /* Responsive móvil */
-  @media (max-width: 640px){
-    header h3{font-size:1.1rem;}
-    .hud{right:12px; top:12px}
-    .btn{padding:8px 10px; border-radius:10px}
-    .centerpiece img{width:min(82vmin, 360px)}
-    .audioBtn{bottom:28px; width:56px; height:56px}
-    .brand{left:12px; bottom:76px; font-size:11px}
-  }
-</style>
+/* 📌 Card buscador fija */
+.card.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: #fff; /* para que no se mezcle con el fondo al desplazarse */
+}
+
+  </style>
 </head>
 <body>
-  <!-- Título en encabezado -->
-  <header>
-    <h3>✨ Micaela, tú eres la flor más linda de mi vida</h3>
-  </header>
+  <div class="wrap">
+    <h1>Buscador</h1>
 
-  <canvas id="sky"></canvas>
+    <!-- 🔍 BUSCADOR -->
+    <div class="card sticky" style="margin-bottom:16px">
+      <div class="row">
+        <input id="buscador" type="text" placeholder="Escribe para buscar..." autofocus />
+        <button id="btnLimpiar" class="btn-secondary" title="Limpiar">Limpiar</button>
+        <button id="btnToggleForm" class="btn">➕ Mostrar/Ocultar Formulario</button>
+      </div>
+      <p class="muted" style="margin:8px 0 0">Mostrando resultados para: <strong id="queryDisplay">—</strong></p>
+    </div>
 
-  <!-- Centro -->
-  <div class="centerpiece">
-    <img id="heroImage" src="" alt="Imagen central" loading="eager" />
+    <!-- ➕ FORMULARIO -->
+    <div id="formularioCard" class="card" style="margin-bottom:16px; display:none;">
+      <h2 style="margin-top:0">Agregar / Editar datos</h2>
+      <div class="row" style="align-items:flex-start;">
+        <input id="nuevoEmpresa" type="text" placeholder="Empresa / Lugar" class="small-input" />
+        <input id="nuevaDireccion" type="text" placeholder="Dirección corta" class="small-input" />
+        <input id="nuevoDistrito" type="text" placeholder="Distrito" class="small-input" />
+        <input id="nuevoTelefono" type="text" placeholder="Teléfono" class="small-input" />
+        <input id="nuevaCategoria" type="text" placeholder="Categoría" class="small-input" />
+        <input id="nuevoHorario" type="text" placeholder="Horario de atención" class="small-input" />
+        <input id="nuevoLink" type="text" placeholder="Link de Google Maps" style="flex:1 1 100%;" />
+        <input id="nuevaImagen" type="text" placeholder="URL de la imagen" style="flex:1 1 100%;" />
+        <textarea id="nuevoDetalleDireccion" placeholder="Detalle de la dirección (enter funciona)"></textarea>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button id="btnAgregar" class="btn">Agregar / Guardar</button>
+          <button id="btnBorrar" class="btn-secondary" title="Borrar todo">🗑️ Borrar todo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📋 RESULTADOS -->
+    <div class="card">
+      <div class="row" style="justify-content: space-between; margin-bottom: 8px;">
+        <h2 style="margin:0">Resultados</h2>
+        <span class="muted" id="conteo">0 items</span>
+      </div>
+      <div style="overflow:auto">
+        <table id="tabla">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Empresa</th>
+              <th>Dirección</th>
+              <th>Distrito</th>
+              <th>Ubicación</th>
+              <th>Categoría</th>
+              <th>Horario</th>
+              <th>Teléfono</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="vacio" class="empty" style="display:none">Sin resultados</div>
+    </div>
   </div>
 
-  <!-- Audio de fondo -->
-  <audio id="backgroundMusic" loop autoplay playsinline preload="auto">
-    <source src="https://dl.dropboxusercontent.com/scl/fi/xac2mz0t4homhkvkr1d5w/FLORES-AMARILLAS.mp3?rlkey=uush4yu80dlaz54tbfilgdnb5&st=d0wjojvs" type="audio/mpeg">
-  </audio>
-
-  <!-- Botón circular de audio -->
-  <button id="audioBtn" class="audioBtn">
-    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-  </button>
-
-  <div class="hud">
-    <div id="toggleGlow" class="btn toggle">⭐ Boost amarillo</div>
-    <div id="makeWish" class="btn">🌠 Lanza una fugaz</div>
+  <!-- Modal Imagen -->
+  <div id="modal">
+    <div id="modalContent">
+      <button id="cerrarModal">✖</button>
+      <img id="modalImg" src="" alt="Vista">
+    </div>
   </div>
 
-  <div class="brand">Haz clic o toca para lanzar una estrella fugaz</div>
+  <!-- Modal Dirección -->
+  <div id="modalDireccion">
+    <div id="modalDireccionContent">
+      <button id="cerrarModalDireccion">✖</button>
+      <h3 id="modalEmpresa"></h3>
+      <p><strong>Dirección:</strong> <span id="modalDireccionCorta"></span></p>
+      <p><strong>Distrito:</strong> <span id="modalDistrito"></span></p>
+      <p><strong>Detalle dirección:</strong> <span id="modalDetalleDireccion"></span></p>
+      <p><strong>Ubicación:</strong> <a id="modalLink" href="#" target="_blank">Ver en Maps</a></p>
+      <p><strong>Categoría:</strong> <span id="modalCategoria"></span></p>
+      <p><strong>Horario:</strong> <span id="modalHorario"></span></p>
+      <p><strong>Teléfono:</strong> <span id="modalTelefono"></span></p>
+      <img id="modalDireccionImg" src="" alt="Imagen relacionada">
+      <!-- Botones de acción en el modal -->
+      <div id="modalAcciones">
+        <button id="modalEditar" class="btn-secondary">✏️ Editar</button>
+        <button id="modalEliminar" class="btn">🗑️ Eliminar</button>
+      </div>
+    </div>
+</div>
 
 <script>
-(() => {
-  const canvas = document.getElementById('sky');
-  const ctx = canvas.getContext('2d');
-  let DPR = Math.max(1, Math.floor(window.devicePixelRatio || 1));
-  let W = 0, H = 0;
-  let stars = [], twinkles = [], comets = [];
-  let lastTime = 0;
-  let yellowBoost = false;
+  // 🔑 Clave para usar en localStorage
+  const STORAGE_KEY = "misDatos";
 
-  function resize(){
-    W = canvas.width  = Math.floor(innerWidth  * DPR);
-    H = canvas.height = Math.floor(innerHeight * DPR);
+  // 📦 Datos base (fijos)
+  const BASE_DATOS = [
+     { id: 1, empresa: "CBC peruana", direccion: "Huachipa", detalleDireccion: "Los Laureles 127, Lurigancho-Chosica 15457", distrito: "Este Lurigancho", telefono: "990297533", categoria: "Entrega", link: "https://maps.app.goo.gl/YBjWY1vPtzsbBUP76", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/cbcPeruana.png?raw=true", horario: "3pm" },
+    { id: 2, empresa: "Resemin S.A", direccion: "Urb Inds Sta Rosa", detalleDireccion: "Luis Galvani 392, Lima 15022", distrito: "Este Ate", telefono: "987654321", categoria: "Entrega", link: "https://maps.app.goo.gl/KRvQv7YVbn7MX8mLA", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/reseminAte.png?raw=true", horario: "Lun-Sab 9am-5pm" },
+    { id: 3, empresa: "Caliza inka", direccion: "Huachipa", detalleDireccion: "Sub Lote, Av. Cajamarquilla 2C, Lurigancho-Chosica", distrito: "Este Lurigancho", telefono: "-", categoria: "Empresa", link: "https://maps.app.goo.gl/XX6wbq553ud4aNWc6", imagen: "-", horario: "3pm" },
+    { id: 4, empresa: "Resemin Priale", direccion: "Huachipa", detalleDireccion: "Av. Huachipa 215, Lima 15457", distrito: "Este Lurigancho", telefono: "-", categoria: "Entrega", link: "https://maps.app.goo.gl/vtGViX5P9aVdHFkS7", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Resemin%20priale%20Empresa.jpg?raw=true", horario: "3pm" },
+
+  // empresas de compras
+  { id: 5, empresa: "SAMPLAST S.A.C.", direccion: "Av. El Bosque 883", detalleDireccion: "Av. El Bosque 883, Urb. Semi Rústica", distrito: "Este SJL", telefono: "987303111", categoria: "Compras", link: "-", imagen: "-", horario: "10am–12pm / 2–5pm" },
+  { id: 6, empresa: "ROATSA", direccion: "Av. Defensores del Morro 222", detalleDireccion: "Av. Defensores del Morro 222", distrito: "Sur Chorrillos", telefono: "965399694", categoria: "Compras", link: "-", imagen: "-", horario: "Lun–Vie 8:30–6pm, Sáb 8:30–12pm" },
+  { id: 7, empresa: "MULTIUTILES.COM", direccion: "Jr. Camaná 1103", detalleDireccion: "Jr. Camaná 1103 (Cruce con Uruguay, frente al Ceprevi)", distrito: "Centro Lima", telefono: "998299624", categoria: "Compras", link: "-", imagen: "-", horario: "Lun–Vie 9:05–7:20pm, Sáb 9:30–6:15pm" },
+  { id: 9, empresa: "IMPORT SUMARY E.I.R.L.", direccion: "Jr. Paruro 1132", detalleDireccion: "Jr. Paruro 1132", distrito: "Centro Lima", telefono: "962640043", categoria: "Compras", link: "-", imagen: "-", horario: "9:30am–7pm" },
+  { id: 10, empresa: "PAZ MENA EDGAR H.", direccion: "Dentro plaza Nicolini", detalleDireccion: "Av. Argentina 215, CC Nicolini, Int Ae-7 Pasaje 10", distrito: "Centro Lima", telefono: "994223603", categoria: "Compras", link: "https://maps.app.goo.gl/gUVMzSfmQD1DHa9b7", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Pernos%20y%20paz%20Compras.jpg?raw=true", horario: "Lun–Sáb 9–6" },
+  { id: 11, empresa: "TECNIEMPAQUETADURAS SR LTDA", direccion: "Av. Alfonso Ugarte 760", detalleDireccion: "Av. Alfonso Ugarte 760 Int. 202", distrito: "Centro Lima", telefono: "989779850", categoria: "Compras", link: "-", imagen: "-", horario: "-" },
+  
+  { id: 13, empresa: "CIA STALEX S.A.C.", direccion: "Guillermo Dansey 979", detalleDireccion: "Guillermo Dansey 979 Int. E7", distrito: "Centro Malvinas", telefono: "998849258", categoria: "Compras", link: "-", imagen: "-", horario: "-" },
+  { id: 14, empresa: "INVERSIONES TUBO LUZ E.I.R.L.", direccion: "Calle Ascope 462", detalleDireccion: "Calle Ascope 462 Int. 16Y1", distrito: "Centro Malvinas", telefono: "994173093", categoria: "Compras", link: "https://maps.app.goo.gl/9oZeCS3Y6tR76ceZ6", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/tuboluzCompras.jpg?raw=true", horario: "Lun–Vie 9–5:30, Sáb 9–1" },
+ 
+  { id: 16, empresa: "COROIMPORT S.A.C.", direccion: "Luis Galvani 381", detalleDireccion: "Luis Galvani 381, Urb. Ate 3", distrito: "Este Ate", telefono: "940246764", categoria: "Compras", link: "-", imagen: "-", horario: "12–12:30 / 2–4:30" },
+  { id: 17, empresa: "CODIFELSA S.A.C.", direccion: "Av. Guillermo Dansey 411", detalleDireccion: "Av. Guillermo Dansey 411, CC Plaza Ferretero, Pasaje B, SS092", distrito: "Centro Malvinas", telefono: "994121136", categoria: "Compras", link: "-", imagen: "-", horario: "Lun–Vie 9–6, Sáb 9–1" },
+  { id: 18, empresa: "IMPORTADORA Y DISTRIBUIDORA DE…", direccion: "Jr. Cárcamo 506", detalleDireccion: "Jr. Cárcamo 506", distrito: "Centro Lima", telefono: "936524459", categoria: "Compras", link: "-", imagen: "-", horario: "Lun–Vie 8–6 corrido" },
+  { id: 19, empresa: "ILUMINACIONES MILLENIUM S.A.C.", direccion: "Jr. Lampa 1125a", detalleDireccion: "Jr. Lampa 1125a, Lima 15001", distrito: "Centro Lima", telefono: "946595601", categoria: "Compras", link: "https://www.google.com/maps/search/?api=1&query=Jr.+Lampa+1125a,+Lima+15001", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Milenium%20Compras.jpg?raw=true", horario: "Lun–Sáb 9–7" },
+  { id: 20, empresa: "ELECTRONIC MIHABA CORP.", direccion: "Jr. Pascual Oliveros 873", detalleDireccion: "Jr. Pascual Oliveros 873, Urb. Sta. Catalina", distrito: "Centro La Victoria", telefono: "960405732", categoria: "Compras", link: "-", imagen: "-", horario: "Lun–Vie 9–6, Sáb 9–1" },
+  { id: 21, empresa: "AGERSA PERÚ E.I.R.L.", direccion: "Av. Abancay 815", detalleDireccion: "Av. Abancay 815 Int. 130", distrito: "Centro Lima", telefono: "918428772", categoria: "Compras", link: "-", imagen: "-", horario: "9:30–7pm" },
+  { id: 22, empresa: "UYUSTOOLS PERÚ SRL", direccion: "Jr. Juan del Mar y Bernedo 1040", detalleDireccion: "Jr. Juan del Mar y Bernedo 1040, Urb. Chacra Ríos Sur", distrito: "Centro Breña", telefono: "-", categoria: "Compras", link: "-", imagen: "-", horario: "-" },
+  { id: 23, empresa: "PROINDUSTRIAS E Y M", direccion: "Av. Guillermo Dansey 417", detalleDireccion: "Av. Guillermo Dansey 417, CC Plaza Ferretero, Sótano SS007 Pasaje C (Malvinas)", distrito: "Centro Malvinas", telefono: "970666778", categoria: "Compras", link: "https://maps.app.goo.gl/3BuuUbJREi8ogAWk9", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/ProindustriaEyMCompras.jpg?raw=true", horario: "9am a 6pm / hasta 1pm" },
+  { id: 24, empresa: "COREINJ", direccion: "Av. Guillermo Dansey 454", detalleDireccion: "Av. Guillermo Dansey 454, CC Nicolini, Psj 5 Stand BB-9A, Malvinas", distrito: "Centro Malvinas", telefono: "950499053", categoria: "Compras", link: "-", imagen: "-", horario: "9am a 6pm / hasta 1pm" },
+
+  
+  { id: 25, empresa: "IMPORTACIONES ROSALUZ", direccion: "Av. Guillermo Dansey 413", detalleDireccion: "Av. Guillermo Dansey 413 (C. Ferretero)", distrito: "Centro Lima", contacto: "Rosaluz Hernandez", telefono: "922337568", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 26, empresa: "ELECTRO ENCHUFE S.A.C.", direccion: "Av. Óscar R. Benavides 405", detalleDireccion: "Av. Óscar R. Benavides 405, Lima 15082", distrito: "Centro Lima", contacto: "-", telefono: "972521029", horario: "8am a 6pm", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 27, empresa: "V & M SAFETY PERU S.A.C.", direccion: "Jr. Ascope 569", detalleDireccion: "Jirón Ascope 569, Esq. Malvinas", distrito: "Centro Lima", contacto: "Guadalupe", telefono: "963963015", horario: "L-V 9am a 6pm (No sábados)", categoria: "Compras", link: "-", imagen: "-" },
+  
+  { id: 28, empresa: "WELDER POWER EIRL", direccion: "Av. Oscar R. Benavides 102", detalleDireccion: "Av. Oscar R. Benavides 102, Plaza 2 de Mayo (Ref: Grifo Repsol)", distrito: "Centro Lima", contacto: "-", telefono: "-", horario: "Hasta las 4PM", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 29, empresa: "DISTRIBUIDORA CLEAN TWIST", direccion: "Paseo de la República 788", detalleDireccion: "Paseo de la República 788 Urbanización, La Victoria", distrito: "Centro La Victoria", contacto: "-", telefono: "992906361", horario: "L–V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 30, empresa: "TERRA PLASTIC S.A.", direccion: "Jr. Andahuaylas 1009", detalleDireccion: "Jr. Andahuaylas 1009, Lima 15001", distrito: "Centro Lima", contacto: "-", telefono: "994482151", horario: "9AM–7PM", categoria: "Compras", link: "https://maps.app.goo.gl/R2E5B5aBDXzNdqho9", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/En%20terraplastic%20SACCompras.jpg?raw=true" },
+  { id: 31, empresa: "AGROMARKET.PE", direccion: "Calle Alcanfores 1245", detalleDireccion: "Calle Alcanfores 1245 (Larcomar)", distrito: "Sur Miraflores", contacto: "Bruno Cilloniz", telefono: "970125799", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  
+  { id: 33, empresa: "GOALSA CENTER S.A.C.", direccion: "Av. Guillermo Dansey 417", detalleDireccion: "Av. Guillermo Dansey 417, 3er piso Tienda 3022–3023, C.C. Plaza Ferretero – Malvinas", distrito: "Centro Lima", contacto: "-", telefono: "999329541 / 969472462", horario: "L–V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "https://www.google.com/maps/search/?api=1&query=Av.+Guillermo+Dansey+417,+Lima", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/GoalsaCompras.jpg?raw=true" },
+  { id: 34, empresa: "ARDICORP SAC", direccion: "Sta. María 230", detalleDireccion: "La Aurora, Sta. María 230, Ate 15022", distrito: "Este Ate", contacto: "Richard", telefono: "-", horario: "L–V 9AM–5PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 35, empresa: "IMPORTACIONES CODIZA S.A.", direccion: "Malvinas Cárcamo", detalleDireccion: "Malvinas Cárcamo", distrito: "Centro Lima", contacto: "-", telefono: "994271457", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  
+  { id: 37, empresa: "CARDEPACK", direccion: "Villa El Salvador", detalleDireccion: "Villa El Salvador", distrito: "Sur Villa El Salvador", contacto: "Enrique Sánchez", telefono: "-", horario: "Hasta las 5PM", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 38, empresa: "YOHERSA", direccion: "Av. El Sol 208", detalleDireccion: "Av. El Sol 208, Villa El Salvador 15816", distrito: "Sur Villa El Salvador", contacto: "-", telefono: "-", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 39, empresa: "DAYR", direccion: "Jr. Las Getias Mz. A Lote 42", detalleDireccion: "Jr. Las Getias Mz. A Lote 42, Urb. Las Flores 78", distrito: "Este SJL", contacto: "WA", telefono: "905471483", horario: "7AM–5PM", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 40, empresa: "PLESA", direccion: "C. José Díaz 426", detalleDireccion: "C. José Díaz 426, Lima 15046", distrito: "Centro Lima", contacto: "-", telefono: "-", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 41, empresa: "AMERICAS", direccion: "Av. Jose Galvez 1015", detalleDireccion: "Av. Jose Galvez Nro. 1015", distrito: "Centro La Victoria", contacto: "-", telefono: "946458176", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 42, empresa: "FABRICACIONES Y EMPAQUETADURAS REY", direccion: "Psje. San Benito de Palermo 164", detalleDireccion: "Psje. San Benito de Palermo 164, Coop. Niño Jesús (Alt. cdra. 5 Av. Cárcamo c/ Av. Colonial)", distrito: "Centro Lima", contacto: "Valentín G.", telefono: "-", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 43, empresa: "PIZARRAS DANNY E.I.R.L", direccion: "Jr. Ucayali 779 A", detalleDireccion: "Jr. Ucayali 779 A, Lima Cercado", distrito: "Centro Lima", contacto: "Sr. Roberto", telefono: "946054176", horario: "L-S 10AM – 7PM (corrido)", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 44, empresa: "HALLEY PERFORMANCE", direccion: "Breña", detalleDireccion: "Breña", distrito: "Centro Breña", contacto: "-", telefono: "-", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 45, empresa: "PROMELSA", direccion: "Av. Guillermo Dansey 1094", detalleDireccion: "Av. Guillermo Dansey 1094, Cercado de Lima", distrito: "Centro Lima", contacto: "WA Ventas", telefono: "994591915", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 46, empresa: "RM SMART S.A.C.", direccion: "Barrios Altos", detalleDireccion: "Barrios Altos, Tienda 363, frente a la juguería, rampa subiendo", distrito: "Centro Lima", contacto: "-", telefono: "-", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 47, empresa: "TECNIFAJAS S.A.", direccion: "Av. Argentina 3006", detalleDireccion: "Av. Argentina 3006, Lima", distrito: "Centro Lima", contacto: "Martín C.", telefono: "998145590", horario: "L-V 8:30AM–5:30PM / S 8:30AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 48, empresa: "INDUSTRIAL COMERCIAL SANTA ADE", direccion: "Av. Colonial 2463", detalleDireccion: "Av. Colonial 2463, Urb., Lima 15081", distrito: "Centro Cercado Lima", contacto: "Uber Salazar", telefono: "989595313", horario: "L-V 8AM–5:45PM (corr.)", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 49, empresa: "WEST VISION", direccion: "Jr. Cuzco 440, Int. 288", detalleDireccion: "Jr. Cuzco 440, Int. 288, Lima", distrito: "Centro Lima", contacto: "Eva S.", telefono: "997307059", horario: "L-V 10:30AM–6PM / S 10:30AM–2PM", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 50, empresa: "DASMITEC PERÚ", direccion: "Av. Garcilaso de la Vega 1358, C.C. Plazatec Int. 344", detalleDireccion: "Av. Garcilaso de la Vega 1358, C.C. Plazatec Int. 344, Lima", distrito: "Centro Lima", contacto: "Jacob Rakow", telefono: "935329993", horario: "10AM–6PM", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 52, empresa: "PRECISUR", direccion: "Av. Morales Duares 1717", detalleDireccion: "Av. Morales Duares 1717, Cercado Lima (Altura Puente Dueñas)", distrito: "Centro Cercado Lima", contacto: "-", telefono: "-", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+  { id: 53, empresa: "CORPORACION EMACIN S.A.C.", direccion: "Av. Ramón Cárcamo 540–542", detalleDireccion: "Av. Ramón Cárcamo 540–542, Lima (Alt. cdra. 6–7 Av. Colonial / Av. Argentina)", distrito: "Centro Lima", contacto: "Alejandro Tam", telefono: "992105254", horario: "L-V 8:30AM–5PM / S 8:30AM–1:30PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 54, empresa: "CAJUSOL", direccion: "Pasj 1 Principal, Tienda Y1-4, La Bellota", detalleDireccion: "Pasaje 1 Principal, Tienda Y1-4, CC La Bellota, Av. Dansey 520, Malvinas, Lima", distrito: "Centro Lima", contacto: "Jan", telefono: "921819283", horario: "L-V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "https://maps.app.goo.gl/kktcSwFJgEKG8TcM7", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/CajusolCompras.jpg?raw=true" },
+{ id: 55, empresa: "FIORELLA REPRESENTACIONES S.A.", direccion: "C. Omicron 215", detalleDireccion: "C. Omicron 215, Callao 07006", distrito: "Oeste Callao", contacto: "Bety", telefono: "946126140", horario: "L-V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Fiorella%20Representaciones.jpg?raw=true" },
+{ id: 56, empresa: "GUILLERMO ROMERO", direccion: "Av. Horacio Urteaga 1156, Oficina 201", detalleDireccion: "Av. Horacio Urteaga 1156, Oficina 201, Jesús María", distrito: "Centro Jesús María", contacto: "-", telefono: "-", horario: "-", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 57, empresa: "GRUPO CARLITOS", direccion: "Jr. Huarochirí 649–653, Malvinas", detalleDireccion: "Jr. Huarochirí 649–653, Lima 15082, Malvinas", distrito: "Centro Lima", contacto: "Ricardo", telefono: "994065623", horario: "L-V 9AM–6PM / S 9AM–1PM (corrido)", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/GrupoCarlitosCompras.jpg?raw=true" },
+{ id: 58, empresa: "OBRAS FERRETERO", direccion: "-", detalleDireccion: "Lima", distrito: "Centro Lima", contacto: "-", telefono: "958107975", horario: "L-V 9AM–6PM / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "-" },
+
+{ id: 59, empresa: "SONEPAR", direccion: "Jr. Yungay 1870", detalleDireccion: "Jr. Yungay 1870, Lima 15081", distrito: "Centro Lima", contacto: "Julio Cortez", telefono: "994019384", horario: "L-V 9AM–6:30PM (corr.) / S 9AM–1PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/EnSoneparCompras.jpg?raw=true" },
+{ id: 60, empresa: "OHMI IMPORT S.A.", direccion: "Jr. Cusco 829", detalleDireccion: "Jr. Cusco 829, Lima 15001, Centro", distrito: "Centro Lima", contacto: "Raúl", telefono: "977241586", horario: "L-V 8AM–1PM / 2PM–5PM", categoria: "Compras", link: "-", imagen: "-" },
+
+{ id: 62, empresa: "DISTRIBUCIONES CLEER", direccion: "Av. Argentina con Colonial", detalleDireccion: "Av. Argentina con Colonial, Lima", distrito: "Centro Lima", contacto: "-", telefono: "947318205", horario: "8AM-1PM / 2PM-5PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 63, empresa: "P & L IMPORTACIONES INDUSTRIAL", direccion: "Jr. Huancavelica 1196, Espaldas del C.C. Unicentro", detalleDireccion: "Jr. Huancavelica 1196, Espaldas del C.C. Unicentro, Cercado de Lima", distrito: "Centro Cercado Lima", contacto: "David", telefono: "905436251", horario: "9AM-5:30PM (Refrig 1-2PM)", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 64, empresa: "TERRA PLASTIC SOCIEDAD ANONIMA", direccion: "Jr. Santa Rosa 1318, Barrios Altos", detalleDireccion: "Jr. Santa Rosa 1318, Barrios Altos, Lima", distrito: "Centro Lima", contacto: "Jeny", telefono: "994482151", horario: "9AM-7PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/En%20terraplastic%20sociedad%20anonimaCompras.jpg?raw=true" },
+{ id: 65, empresa: "PLAN ENTERPRISE S.A.", direccion: "C. José Díaz 426 (por Estadio Nacional)", detalleDireccion: "C. José Díaz 426 (por Estadio Nacional), Lima", distrito: "Centro Lima", contacto: "David", telefono: "947277296", horario: "8AM-5PM (Refrig 1-2PM)", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 66, empresa: "CORPORACION ELECTRO INDUSTRIAL", direccion: "Av. Guillermo Dansey 454, CC Nicolini Psj 5 Stand BB-9A", detalleDireccion: "Av. Guillermo Dansey 454, CC Nicolini Psj 5 Stand BB-9A, Lima", distrito: "Centro Lima", contacto: "Jimy", telefono: "950499053", horario: "L-V 8:30-6:30PM, S 8-4PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 67, empresa: "INVERSIONES JENNER", direccion: "Av. Argentina 215 Psj 11 P-15 CC Nicolini", detalleDireccion: "Av. Argentina 215 Psj 11 P-15 CC Nicolini, Lima", distrito: "Centro Lima", contacto: "Jenner", telefono: "922891229", horario: "L-V 9AM-6PM", categoria: "Compras", link: "https://maps.app.goo.gl/TRSEnaRrMftnAuLN9", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/JennerCompras.jpg?raw=true" },
+
+{ id: 69, empresa: "ACEROS INDUSTRIALES ACRIMSA", direccion: "Jr. Mariscal Luzuriaga 533", detalleDireccion: "Jr. Mariscal Luzuriaga 533, Jesús María", distrito: "Centro Jesús María", contacto: "Fiorella", telefono: "943491058", horario: "L-V 9AM-6PM, S 9AM-1PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 70, empresa: "GRUPO COINP S.A.C", direccion: "Jr. Alemania 2242", detalleDireccion: "Jr. Alemania 2242, Lima", distrito: "Centro Lima", contacto: "Cesar Yengle", telefono: "908916033", horario: "L-V 8:30AM-6PM (Refrig 1-2PM)", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 71, empresa: "MACROQUIMICOS S.A.C.", direccion: "Bartolomé Herrera 775", detalleDireccion: "Bartolomé Herrera 775, Lince", distrito: "Centro Lince", contacto: "Valeria Filomeno", telefono: "975492530", horario: "L-V 8AM-1PM / 2PM-5:30PM, S 9AM-1PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 72, empresa: "REFRIGERACION RENZO S.A.", direccion: "Av. Óscar R. Benavides 279", detalleDireccion: "Av. Óscar R. Benavides 279, Lima", distrito: "Centro Lima", contacto: "Gabriela Ortecho", telefono: "994144943", horario: "L-V 8:30AM-5:30PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 73, empresa: "FERRETERIA INDUSTRIAL JORDAN", direccion: "Jr. Ramón Cárcamo 450 Int. 164 Galería Aspeco Femein", detalleDireccion: "Jr. Ramón Cárcamo 450 Int. 164 Galería Aspeco Femein, Lima", distrito: "Centro Lima", contacto: "Sr. Blanco", telefono: "998227989", horario: "L-V 9AM-5:30PM, S 9AM-1PM", categoria: "Compras", link: "https://maps.app.goo.gl/RDoHpz8o3GA11RNm8", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/JordanCompras.jpg?raw=true" },
+
+{ id: 75, empresa: "SISTEMAS AGRORIEGOS DEL PERU", direccion: "Av. Argentina 327 Int A-1, CC La Bellota", detalleDireccion: "Av. Argentina 327 Int A-1, CC La Bellota, Lima", distrito: "Centro Lima", contacto: "Victor", telefono: "955371021", horario: "9AM-6PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 76, empresa: "BUILDING SYSTEMS PERU S.A.C.", direccion: "Av. Faucett 1631, Urb. Jardines Viru", detalleDireccion: "Av. Faucett 1631, Urb. Jardines Viru, Bellavista, Callao", distrito: "Oeste Callao", contacto: "-", telefono: "981288456", horario: "Refrig 12-2PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 77, empresa: "J & V MULTIUTILES PUNTO COM", direccion: "Jr. Camaná 1103, Cruce con Uruguay", detalleDireccion: "Jr. Camaná 1103, Cruce con Uruguay, Cercado Lima", distrito: "Centro Cercado Lima", contacto: "-", telefono: "998299624", horario: "L-V 9:05AM-7:20PM, S 9:30AM-6:15PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 78, empresa: "PJ FARMA S.R.L.", direccion: "Jr. Chancay 650", detalleDireccion: "Jr. Chancay 650, Cercado de Lima", distrito: "Centro Cercado Lima", contacto: "-", telefono: "991778777", horario: "L-V 9AM-5PM, S 9AM-1PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 79, empresa: "MC SUMINISTROS", direccion: "Urb. Procion Mz. J Lt. 2 Calle 2, Bellavista", detalleDireccion: "Urb. Procion Mz. J Lt. 2 Calle 2, Bellavista, Callao", distrito: "Oeste Callao", contacto: "Jaime Aznaran", telefono: "922338085", horario: "L-V 9AM-5PM (Refrig 1-2PM)", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 90, empresa: "BRACSAN S.A.C.", direccion: "Jr. Paruro 1353 Int 214 2do piso", detalleDireccion: "Jr. Paruro 1353 Int 214 2do piso, Cercado Lima", distrito: "Centro Cercado Lima", contacto: "-", telefono: "950970761", horario: "L-V 9AM-6PM, S 9AM-3PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 91, empresa: "FORUSA S.A.C.", direccion: "Plaza Ferretero o Nicolini", detalleDireccion: "En Nicolini , Lima", distrito: "Centro Lima", contacto: "Javier", telefono: "959096306", horario: "L-V 9AM-6PM", categoria: "Compras", link: "https://maps.app.goo.gl/AKWyTezaeZbCEmmM6", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Forusa%20Compras.jpg?raw=true" },
+{ id: 92, empresa: "AYMURAY SAFETY S.A.C.", direccion: "Colonial 419 Interior 3, Portón Plomo", detalleDireccion: "Colonial 419 Interior 3, Portón Plomo, Cercado de Lima", distrito: "Centro Cercado Lima", contacto: "Diego", telefono: "940786398", horario: "Hasta las 6PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 93, empresa: "PROSINFER EIRL", direccion: "C. José Celendon 1072 (Entre Dueñas y Colonial)", detalleDireccion: "C. José Celendon 1072 (Entre Dueñas y Colonial), Lima", distrito: "Centro Lima", contacto: "-", telefono: "918527378", horario: "L-V 9AM-6PM, S 9AM-1PM", categoria: "Compras", link: "https://maps.app.goo.gl/hGz24L9EvMDytwYS7", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Prosinfer%20Compras.jpg?raw=true" },
+{ id: 94, empresa: "BENDEZU", direccion: "Av. Óscar R. Benavides 578", detalleDireccion: "Av. Óscar R. Benavides 578, Lima", distrito: "Centro Lima", contacto: "-", telefono: "970390185", horario: "7AM-5PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Bendezu%20Compras.jpg?raw=true" },
+{ id: 95, empresa: "Distribuidora y abastecedora max", direccion: "Av. José Gálvez 120", detalleDireccion: "Av. José Gálvez 120, La Victoria", distrito: "Centro La Victoria", contacto: "-", telefono: "-", horario: "Hasta 8PM", categoria: "Compras", link: "-", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Distribuidora%20y%20abastecedora%20Max%20Compras.jpg?raw=true" },
+{ id: 96, empresa: "ZITROM PERU EIRL", direccion: "Cal. Valerianias A11 Int 2P, Urb. Santa Rosita", detalleDireccion: "Cal. Valerianias A11 Int 2P, Urb. Santa Rosita, Ate", distrito: "Este Ate", contacto: "-", telefono: "942068938", horario: "10:30AM-1PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 97, empresa: "VICSA SAFETY PERU S.A.C.", direccion: "Av. Santa Rosa 350, Zona Industrial", detalleDireccion: "Av. Santa Rosa 350, Zona Industrial, Ate", distrito: "Este Ate", contacto: "Kevin", telefono: "943258758", horario: "L-V 8AM-5:30PM", categoria: "Compras", link: "https://www.google.com/maps/search/?api=1&query=Av.+Santa+Rosa+350,+Ate,+Lima", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Vicsa%20safetyCompras.jpg?raw=true" },
+{ id: 98, empresa: "S & H REPRESENTACIONES", direccion: "Av. Garcilaso de la Vega 203, Urb. la Colonial", detalleDireccion: "Av. Garcilaso de la Vega 203, Urb. la Colonial, Callao", distrito: "Oeste Callao", contacto: "-", telefono: "-", horario: "Hasta 5PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 99, empresa: "MULTI TOP S.A.C.", direccion: "Av. Iquitos 670", detalleDireccion: "Av. Iquitos 670, La Victoria 15033", distrito: "Centro La Victoria", contacto: "-", telefono: "987966770", horario: "L-S 8AM-6:30PM, Feriados 9AM-5PM", categoria: "Compras", link: "-", imagen: "-" },
+{ id: 100, empresa: "GUANTES & GUANTES S.A.", direccion: "Calle Mariscal Andres de Sta. Cruz 325, Urb. El Pino", detalleDireccion: "Calle Mariscal Andres de Sta. Cruz 325, San Luis 15022", distrito: "Centro San Luis", contacto: "Rosario", telefono: "988570724", horario: "L-V 9AM-1PM / 2PM-",categoria: "Compras", link: "https://maps.app.goo.gl/Upsu8UVTSeuH83Nh7", imagen: "https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/Guantes%20y%20guantesCompras.jpg?raw=true" 
+} 
+  ];
+
+  // 📥 Cargar datos desde localStorage (extras) + base
+  let datos = [...BASE_DATOS, ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || [])];
+  let filtro = "";
+  let editandoId = null;
+
+  const el = id => document.getElementById(id);
+
+  // Normalizar texto (para buscar sin tildes/mayúsculas)
+  function normalizarTexto(t) {
+    return (t ?? "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   }
-  window.addEventListener('resize', () => { DPR = Math.max(1, Math.floor(devicePixelRatio||1)); resize(); initStars(true); });
-  resize();
 
-  function rand(min,max){ return Math.random()*(max-min)+min; }
+  // Ver si un registro coincide con el filtro
+  function coincideRegistro(reg, needle) {
+    if (!needle) return true;
+    const n = normalizarTexto(needle);
+    return [reg.id, reg.empresa, reg.direccion, reg.detalleDireccion, reg.distrito, reg.telefono, reg.categoria, reg.horario]
+      .map(v => normalizarTexto(v))
+      .some(v => v.includes(n));
+  }
 
-  // ---------- Estrellas estáticas + parpadeo ----------
-  function initStars(keep=false){
-    const targetCount = Math.floor((W*H)/(11000 * DPR));
-    if(!keep){ stars = []; twinkles = []; }
-    while(stars.length < targetCount){
-      const x = Math.random()*W;
-      const y = Math.random()*H;
-      const r = rand(0.6, 1.6) * DPR;
-      const tone = Math.random();
-      const color = tone < 0.15 ? `rgba(255,193,7,${rand(.6,.9)})` : `rgba(${200+~~rand(0,55)},${210+~~rand(0,45)},255,${rand(.45,.9)})`;
-      stars.push({x,y,r,color});
-      if(Math.random()<0.45){
-        twinkles.push({x,y,base:rand(.25,.9),spd:rand(0.8,1.6),phase:rand(0,Math.PI*2)});
-      }
+  // Resaltar coincidencias en texto
+  function resaltarCoincidencias(texto, needle) {
+    if (!needle) return String(texto);
+    const t = String(texto);
+    const n = normalizarTexto(needle);
+    const base = normalizarTexto(t);
+    let res = "", i = 0;
+    while (i < t.length) {
+      if (base.slice(i).startsWith(n)) {
+        res += `<span class="highlight">${t.slice(i, i + needle.length)}</span>`;
+        i += needle.length;
+      } else { res += t[i]; i++; }
     }
-  }
-  initStars();
-
-  // ---------- Cometas (estrellas fugaces) ----------
-  function spawnComet(x,y,dir){
-    if(x==null||y==null){ x = rand(-W*0.1, W*0.3); y = rand(-H*0.05, H*0.35); }
-    if(dir==null){ dir = rand(Math.PI*0.15, Math.PI*0.35); }
-    const speed = rand(650, 980) * DPR; // px/s
-    const len   = rand(160, 260) * DPR;
-    const life  = rand(950, 1400); // ms
-    const width = rand(1.4, 2.2) * DPR;
-    const hueShift = yellowBoost ? 1 : 0;
-    comets.push({x,y,dir,speed,len,life,age:0,width,hueShift});
+    return res;
   }
 
-  // Auto: cada 3 s
-  setInterval(() => spawnComet(), 3000);
-
-  // Interacción
-  canvas.addEventListener('pointerdown', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * DPR;
-    const y = (e.clientY - rect.top) * DPR;
-    const dir = rand(Math.PI*0.2, Math.PI*0.6);
-    spawnComet(x,y,dir);
-  });
-
-  document.getElementById('makeWish').onclick = () => spawnComet();
-  const toggle = document.getElementById('toggleGlow');
-  toggle.onclick = () => { yellowBoost = !yellowBoost; toggle.classList.toggle('on', yellowBoost); };
-
-  // ===== Audio: autoplay con múltiples rutas =====
-  const audioEl = document.getElementById('backgroundMusic');
-  const audioBtn = document.getElementById('audioBtn');
-
-  function setIcon(state){
-    let svg='';
-    if(state==='play'){
-      svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>';
-      audioBtn.classList.remove('muted');
-    } else if(state==='speaker'){
-      svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm12.5 2a4.5 4.5 0 0 0-2.25-3.9v7.8A4.5 4.5 0 0 0 15.5 12zM15.5 5a9 9 0 0 1 0 14c-1.1 0-2-.9-2-2 0-.3.07-.57.18-.82A7 7 0 0 0 20 12a7 7 0 0 0-6.32-4.18c-.11-.25-.18-.52-.18-.82 0-1.1.9-2 2-2z"/></svg>';
-      audioBtn.classList.remove('muted');
-    } else {
-      svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm13.59-3L15 8.59 17.41 11 15 13.41 16.59 15 19 12.59 21.41 15 23 13.41 20.59 11 23 8.59 21.41 7 19 9.41 16.59 7z"/></svg>';
-      audioBtn.classList.add('muted');
-    }
-    audioBtn.innerHTML = svg;
-  }
-  setIcon('play');
-
-  async function tryAutoplay(){
-    try{
-      audioEl.muted = false;
-      await audioEl.play();           // 1) directo con sonido
-      setIcon('speaker');
-    }catch(e1){
-      try{
-        audioEl.muted = true;         // 2) arranca silenciado
-        await audioEl.play();
-        setTimeout(() => {            // intento de desmuteo inmediato
-          try{ audioEl.muted = false; setIcon('speaker'); }catch(_){}
-        }, 150);
-      }catch(e2){
-        // 3) último recurso: desbloquear en primer gesto
-        const unlock = async () => {
-          try{
-            audioEl.muted = false;
-            await audioEl.play();
-            setIcon('speaker');
-          }catch(_){}
-          document.removeEventListener('pointerdown', unlock);
-          document.removeEventListener('keydown', unlock);
-        };
-        document.addEventListener('pointerdown', unlock, {once:true});
-        document.addEventListener('keydown', unlock, {once:true});
-      }
-    }
-  }
-  window.addEventListener('load', tryAutoplay);
-
-  audioBtn.addEventListener('click', async () => {
-    try{
-      if(audioEl.paused){
-        audioEl.muted = false;
-        await audioEl.play();
-        setIcon('speaker');
+  // Resaltar coincidencias dentro de enlaces/nodos
+  function resaltarCoincidenciasNodo(elemento, texto, needle) {
+    elemento.innerHTML = "";
+    if (!needle) { elemento.textContent = texto; return; }
+    const base = normalizarTexto(texto);
+    const n = normalizarTexto(needle);
+    let i = 0;
+    while (i < texto.length) {
+      if (base.slice(i).startsWith(n)) {
+        const span = document.createElement("span");
+        span.className = "highlight";
+        span.textContent = texto.slice(i, i + needle.length);
+        elemento.appendChild(span);
+        i += needle.length;
       } else {
-        audioEl.muted = !audioEl.muted;
-        setIcon(audioEl.muted ? 'muted' : 'speaker');
+        elemento.appendChild(document.createTextNode(texto[i]));
+        i++;
       }
-    }catch{ setIcon('play'); }
+    }
+  }
+
+  // 💾 Guardar solo los registros extras en localStorage
+  function guardarDatos() {
+    const extras = datos.filter(d => d.id > BASE_DATOS.length);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(extras));
+  }
+
+  // 🎨 Renderizar la tabla
+  function render() {
+    const cuerpo = el("tbody"), vacio = el("vacio"), conteo = el("conteo"), queryDisplay = el("queryDisplay");
+    const filtrados = datos.filter(d => coincideRegistro(d, filtro));
+    conteo.textContent = `${filtrados.length} ${filtrados.length === 1 ? "item" : "items"}`;
+    queryDisplay.textContent = filtro ? `"${filtro}"` : "—";
+    cuerpo.innerHTML = "";
+    if (filtrados.length === 0) { vacio.style.display = "block"; return; } else { vacio.style.display = "none"; }
+    const frag = document.createDocumentFragment();
+    filtrados.forEach(reg => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${reg.id}</td>
+        <td><a href="#" class="empresaLink" data-img="${reg.imagen}" aria-label="Empresa ${reg.empresa}"></a></td>
+        <td><a href="#" class="direccionLink" data-dir="${reg.detalleDireccion}" aria-label="Dirección ${reg.direccion}"></a></td>
+        <td class="td-distrito"></td>
+        <td><a href="${reg.link}" target="_blank" rel="noopener noreferrer">Ver en Maps</a></td>
+        <td class="td-categoria"></td>
+        <td class="td-horario"></td>
+        <td class="td-telefono"></td>
+        <td>
+          <button class="btn-secondary btnEditar" data-id="${reg.id}">✏️</button>
+          <button class="btn btnEliminar" data-id="${reg.id}">🗑️</button>
+        </td>
+      `;
+      const linkEmpresa = tr.querySelector(".empresaLink");
+      resaltarCoincidenciasNodo(linkEmpresa, reg.empresa, filtro);
+      const linkDireccion = tr.querySelector(".direccionLink");
+      resaltarCoincidenciasNodo(linkDireccion, reg.direccion, filtro);
+      tr.querySelector(".td-distrito").innerHTML = resaltarCoincidencias(reg.distrito, filtro);
+      tr.querySelector(".td-categoria").innerHTML = resaltarCoincidencias(reg.categoria, filtro);
+      tr.querySelector(".td-horario").innerHTML = resaltarCoincidencias(reg.horario ?? "—", filtro);
+      tr.querySelector(".td-telefono").innerHTML = resaltarCoincidencias(reg.telefono, filtro);
+      frag.appendChild(tr);
+    });
+    cuerpo.appendChild(frag);
+  }
+
+  // 🟦 Eventos buscador
+  el("buscador").addEventListener("input", e => { filtro = e.target.value.trim(); render(); });
+  el("btnLimpiar").addEventListener("click", () => { filtro = ""; el("buscador").value = ""; render(); el("buscador").focus(); });
+  el("btnToggleForm").addEventListener("click", () => {
+    const formCard = el("formularioCard");
+    formCard.style.display = formCard.style.display === "none" ? "block" : "none";
   });
 
-  audioEl.addEventListener('play', () => setIcon(audioEl.muted ? 'muted' : 'speaker'));
-  audioEl.addEventListener('pause', () => setIcon('play'));
-  audioEl.addEventListener('volumechange', () => setIcon(audioEl.muted ? 'muted' : 'speaker'));
+  // ➕ Agregar / Guardar
+  el("btnAgregar").addEventListener("click", () => {
+    const empresa = el("nuevoEmpresa").value.trim();
+    const direccion = el("nuevaDireccion").value.trim();
+    const detalleDireccion = el("nuevoDetalleDireccion").value.trim();
+    const distrito = el("nuevoDistrito").value.trim();
+    const telefono = el("nuevoTelefono").value.trim();
+    const categoria = el("nuevaCategoria").value.trim();
+    const link = el("nuevoLink").value.trim();
+    const imagen = el("nuevaImagen").value.trim();
+    const horario = el("nuevoHorario").value.trim();
 
-  // ===== Slideshow de 4 imágenes (cambia cada 10s) =====
-  const hero = document.getElementById('heroImage');
-  const imageList = [
-    'https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/rojo.gif?raw=true',
-    'https://cdn.pixabay.com/animation/2024/04/05/15/10/15-10-39-863_512.gif',
-    'https://cdn.pixabay.com/animation/2024/03/13/01/06/01-06-07-391_512.gif',
-    'https://png.pngtree.com/png-clipart/20241110/original/pngtree-yellow-rose-bouquet-clipart-illustration-png-image_16826873.png'
-    
-  ].filter(Boolean);
-
-  let imgIndex = 0;
-
-  function swapTo(index){
-    const nextSrc = imageList[index % imageList.length];
-    if(!nextSrc) return;
-    const preload = new Image();
-    preload.onload = () => {
-      hero.classList.add('is-fading');
-      setTimeout(() => { hero.src = preload.src; hero.classList.remove('is-fading'); }, 160);
-    };
-    preload.src = nextSrc;
-  }
-
-  if(imageList.length){ swapTo(0); }
-  setInterval(() => {
-    if(imageList.length>1){ imgIndex = (imgIndex+1)%imageList.length; swapTo(imgIndex); }
-  }, 10000);
-
-  // ---------- Dibujo del cielo ----------
-  function drawBackground(){
-    const gx = ctx.createRadialGradient(W*0.72, H*0.18, 0, W*0.72, H*0.18, Math.max(W,H)*0.9);
-    gx.addColorStop(0, 'rgba(255,193,7,0.04)');
-    gx.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = gx;
-    ctx.fillRect(0,0,W,H);
-  }
-
-  function drawStars(t){
-    for(const s of stars){
-      ctx.beginPath();
-      ctx.fillStyle = s.color;
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-      ctx.fill();
-
-      const g = ctx.createRadialGradient(s.x,s.y,0, s.x,s.y, s.r*3.2);
-      g.addColorStop(0, 'rgba(255,255,255,.25)');
-      g.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s.x,s.y, s.r*3.2, 0, Math.PI*2); ctx.fill();
+    if (!empresa || !direccion || !detalleDireccion || !distrito || !telefono || !categoria || !link || !imagen || !horario) {
+      alert("Completa todos los campos."); return;
     }
 
-    for(const tw of twinkles){
-      const a = tw.base + Math.sin(t*tw.spd + tw.phase)*0.35 + 0.35;
-      ctx.globalAlpha = Math.max(0, Math.min(1, a));
-      ctx.fillStyle = 'rgba(255,255,255,1)';
-      ctx.fillRect(tw.x, tw.y, 1*DPR, 1*DPR);
-      ctx.globalAlpha = 1;
+    if (editandoId) {
+      const idx = datos.findIndex(d => d.id === editandoId);
+      if (idx >= 0) {
+        datos[idx] = { id: editandoId, empresa, direccion, detalleDireccion, distrito, telefono, categoria, link, imagen, horario };
+      }
+      editandoId = null;
+    } else {
+      const nextId = (datos.at(-1)?.id ?? 0) + 1;
+      datos.push({ id: nextId, empresa, direccion, detalleDireccion, distrito, telefono, categoria, link, imagen, horario });
     }
-  }
 
-  function drawComets(dt){
-    for(let i=comets.length-1; i>=0; i--){
-      const c = comets[i];
-      c.age += dt;
-      const k = c.age / c.life;
-      if(k>=1){ comets.splice(i,1); continue; }
-      const vx = Math.cos(c.dir)*c.speed * (dt/1000);
-      const vy = Math.sin(c.dir)*c.speed * (dt/1000);
-      c.x += vx; c.y += vy;
+    guardarDatos(); // 💾 se guarda en localStorage
+    ["nuevoEmpresa","nuevaDireccion","nuevoDetalleDireccion","nuevoDistrito","nuevoTelefono","nuevaCategoria","nuevoLink","nuevaImagen","nuevoHorario"].forEach(id => el(id).value = "");
+    el("formularioCard").style.display = "none";
+    render();
+  });
 
-      const tail = c.len * (1 - k*0.65);
-      const tx = c.x - Math.cos(c.dir)*tail;
-      const ty = c.y - Math.sin(c.dir)*tail;
+  // 🗑️ Borrar todos los extras
+  el("btnBorrar").addEventListener("click", () => {
+    if (!confirm("¿Seguro que quieres borrar todos los registros agregados?")) return;
+    datos = [...BASE_DATOS];
+    localStorage.removeItem(STORAGE_KEY); // 💾 limpiar localStorage
+    render();
+  });
 
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-
-      const grad = ctx.createLinearGradient(c.x, c.y, tx, ty);
-      const headCol = c.hueShift ? 'rgba(255,193,7,0.95)' : 'rgba(255,213,79,0.9)';
-      grad.addColorStop(0, headCol);
-      grad.addColorStop(0.2, 'rgba(255,193,7,0.55)');
-      grad.addColorStop(1, 'rgba(255,193,7,0)');
-      ctx.strokeStyle = grad;
-      ctx.lineWidth = c.width;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(tx, ty);
-      ctx.lineTo(c.x, c.y);
-      ctx.stroke();
-
-      const spark = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, 18*DPR);
-      spark.addColorStop(0, 'rgba(255,241,118,0.9)');
-      spark.addColorStop(0.5, 'rgba(255,213,79,0.65)');
-      spark.addColorStop(1, 'rgba(255,193,7,0)');
-      ctx.fillStyle = spark;
-      ctx.beginPath();
-      ctx.arc(c.x, c.y, 18*DPR, 0, Math.PI*2);
-      ctx.fill();
-
-      ctx.restore();
+  // ✏️ Delegación de clics (editar, eliminar, modales)
+  document.addEventListener("click", e => {
+    const btnE = e.target.closest(".btnEditar");
+    if (btnE) {
+      const id = Number(btnE.dataset.id);
+      const registro = datos.find(d => d.id === id);
+      if (!registro) return;
+      el("nuevoEmpresa").value = registro.empresa;
+      el("nuevaDireccion").value = registro.direccion;
+      el("nuevoDetalleDireccion").value = registro.detalleDireccion;
+      el("nuevoDistrito").value = registro.distrito;
+      el("nuevoTelefono").value = registro.telefono;
+      el("nuevaCategoria").value = registro.categoria;
+      el("nuevoLink").value = registro.link;
+      el("nuevaImagen").value = registro.imagen;
+      el("nuevoHorario").value = registro.horario ?? "";
+      editandoId = id;
+      el("formularioCard").style.display = "block";
+      el("nuevoEmpresa").focus();
+      return;
     }
-  }
+    const btnDel = e.target.closest(".btnEliminar");
+    if (btnDel) {
+      const id = Number(btnDel.dataset.id);
+      if (id <= BASE_DATOS.length) {
+        alert("No puedes eliminar un dato base."); return;
+      }
+      if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
+      datos = datos.filter(d => d.id !== id);
+      guardarDatos(); // 💾 actualizar localStorage
+      render();
+      return;
+    }
+    const linkEmpresa = e.target.closest(".empresaLink");
+    if (linkEmpresa) {
+      e.preventDefault();
+      const img = linkEmpresa.dataset.img;
+      el("modalImg").src = img || "";
+      el("modal").style.display = "flex";
+      return;
+    }
+    const linkDireccion = e.target.closest(".direccionLink");
+    if (linkDireccion) {
+      e.preventDefault();
+      const id = Number(linkDireccion.closest("tr").children[0].textContent);
+      const registro = datos.find(d => d.id === id);
+      if (!registro) return;
+      el("modalEmpresa").textContent = registro.empresa;
+      el("modalDistrito").textContent = registro.distrito;
+      el("modalDireccionCorta").textContent = registro.direccion;
+      el("modalDetalleDireccion").textContent = registro.detalleDireccion;
+      el("modalLink").href = registro.link || "#";
+      el("modalCategoria").textContent = registro.categoria;
+      el("modalHorario").textContent = registro.horario ?? "—";
+      el("modalTelefono").textContent = registro.telefono;
+      if (registro.imagen && registro.imagen !== "-") {
+        el("modalDireccionImg").src = registro.imagen;
+        el("modalDireccionImg").style.display = "block";
+      } else {
+        el("modalDireccionImg").style.display = "none";
+      }
+      el("modalDireccionContent").dataset.id = id;
+      el("modalDireccion").style.display = "flex";
+      return;
+    }
+  });
 
-  function loop(t){
-    if(!lastTime) lastTime = t; const dt = Math.min(48, t - lastTime); lastTime = t;
-    ctx.fillStyle = 'rgba(2,3,10,0.34)';
-    ctx.fillRect(0,0,W,H);
+  // Botones del modal (editar / eliminar desde modal)
+  el("modalEditar").addEventListener("click", () => {
+    const id = Number(el("modalDireccionContent").dataset.id);
+    const registro = datos.find(d => d.id === id);
+    if (!registro) return;
+    el("nuevoEmpresa").value = registro.empresa;
+    el("nuevaDireccion").value = registro.direccion;
+    el("nuevoDetalleDireccion").value = registro.detalleDireccion;
+    el("nuevoDistrito").value = registro.distrito;
+    el("nuevoTelefono").value = registro.telefono;
+    el("nuevaCategoria").value = registro.categoria;
+    el("nuevoLink").value = registro.link;
+    el("nuevaImagen").value = registro.imagen;
+    el("nuevoHorario").value = registro.horario ?? "";
+    editandoId = id;
+    el("formularioCard").style.display = "block";
+    el("nuevoEmpresa").focus();
+    el("modalDireccion").style.display = "none";
+  });
 
-    drawBackground();
-    drawStars(t*0.0025);
-    drawComets(dt);
+  el("modalEliminar").addEventListener("click", () => {
+    const id = Number(el("modalDireccionContent").dataset.id);
+    if (id <= BASE_DATOS.length) {
+      alert("No puedes eliminar un dato base."); return;
+    }
+    if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
+    datos = datos.filter(d => d.id !== id);
+    guardarDatos(); // 💾 actualizar localStorage
+    render();
+    el("modalDireccion").style.display = "none";
+  });
 
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
-})();
+  // ❌ Cerrar modales
+  el("cerrarModal").addEventListener("click", () => { el("modal").style.display = "none"; });
+  el("cerrarModalDireccion").addEventListener("click", () => { el("modalDireccion").style.display = "none"; });
+  window.addEventListener("click", (e) => {
+    if (e.target === el("modal")) el("modal").style.display = "none";
+    if (e.target === el("modalDireccion")) el("modalDireccion").style.display = "none";
+  });
+
+  // 🚀 Inicializar
+  render();
 </script>
+
 </body>
 </html>
