@@ -1,282 +1,407 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌹</text></svg>">
-    <title>Rose love</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fondo oscuro con estrellas fugaces ✨</title>
+<style>
+  :root{
+    --bg:#02030a;         /* negro azulado profundo */
+    --glow:#ffd54f;       /* amarillo suave */
+    --gold:#ffc107;       /* amarillo brillante */
+  }
+  html,body{height:100%; margin:0;}
+  body{
+    background:
+      radial-gradient(1200px 800px at 70% 20%, rgba(255,213,79,.06), rgba(0,0,0,0)),
+      radial-gradient(900px 600px at 25% 75%, rgba(255,193,7,.05), rgba(0,0,0,0)),
+      var(--bg);
+    overflow:hidden;
+    color:#eaeaea;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  }
 
-        body {
-            height: 100vh;
-            width: 100vw;
-            background: linear-gradient(45deg, #fbb3ff, #ffffff, #fbb3ff);
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+  /* ---------- Título en encabezado ---------- */
+  header {
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:3;
+    text-align:center;
+  }
+  header h3 {
+    margin:0;
+    font-size:1.4rem;
+    font-weight:600;
+    color:#fff;
+    text-shadow: 
+      0 0 6px rgba(255,255,255,0.9),
+      0 0 14px rgba(200,200,255,0.75),
+      0 0 22px rgba(255,213,79,0.55);
+    letter-spacing:1px;
+    margin-top:40px;
+  }
 
-        #particles-container {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-            overflow: hidden;
-        }
+  /* Sutil viñeta para aumentar contraste */
+  body::after{
+    content:"";
+    position:fixed; inset:0;
+    pointer-events:none;
+    background: radial-gradient(1000px 1000px at 50% 50%, transparent 60%, rgba(0,0,0,.35) 100%);
+    mix-blend-mode:multiply;
+  }
 
-        .particle {
-            position: absolute;
-            background-color: rgba(255, 105, 180, 0.3);
-            border-radius: 50%;
-            filter: blur(15px);
-            bottom: -200px;
-            animation: move-particles linear infinite;
-        }
+  canvas{position:fixed; inset:0; width:100%; height:100%; display:block;}
 
-        @keyframes move-particles {
-            from { transform: translateY(0); }
-            to { transform: translateY(-120vh); }
-        }
+  .hud{position:fixed; right:16px; top:16px; display:flex; gap:8px; align-items:center; z-index:2}
+  .btn{
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.14);
+    padding:10px 12px; border-radius:12px; cursor:pointer; user-select:none;
+    backdrop-filter: blur(4px);
+    transition: transform .15s ease, background .2s ease, border-color .2s ease;
+    font-weight:600; letter-spacing:.2px; color:#f4f4f5;
+  }
+  .btn:hover{ transform: translateY(-1px); background:rgba(255,255,255,.10); }
+  .toggle.on{ border-color: rgba(255,193,7,.8); box-shadow: 0 0 24px 4px rgba(255,193,7,.18) inset; }
 
-        .scene-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            height: 100%;
-            padding-top: 10vh;
-            padding-bottom: 5vh;
-        }
+  .brand{position:fixed; left:16px; bottom:16px; opacity:.55; font-size:12px; letter-spacing:.3px; z-index:1}
 
-        .text {
-            position: relative;
-            color: #c9204b;
-            font-size: clamp(3rem, 10vw, 5rem);
-            font-family: 'Great Vibes', cursive;
-            font-weight: bold;
-            text-shadow: 0 0 15px rgba(245, 148, 184, 1);
-            animation: fadeInText 3s ease-in 2.5s forwards;
-            opacity: 0;
-            z-index: 20;
-            text-align: center;
-        }
-        
-        #rose-petals-fall-container {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 5;
-        }
+  /* Imagen central */
+  .centerpiece{position:fixed; inset:0; display:grid; place-items:center; z-index:1; pointer-events:none}
+  .centerpiece img{width:min(70vmin, 420px); height:auto; filter: drop-shadow(0 0 24px rgba(255,193,7,.35)) drop-shadow(0 0 64px rgba(255,193,7,.08)); transition: opacity .6s ease}
+  .centerpiece img.is-fading{opacity:0}
 
-        .falling-rose-petal {
-            position: absolute;
-            background: #d52d58;
-            width: 60px; height: 75px;
-            border-radius: 15px 50%;
-            opacity: 0.9;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
-        }
-        .falling-rose-petal.fall-left { animation: petalFallLeft 12s linear forwards; }
-        .falling-rose-petal.fall-right { animation: petalFallRight 12s linear forwards; }
+  /* Botón circular de audio (play/mute) */
+  .audioBtn {
+    position: fixed;
+    left: 50%;
+    bottom: 43px; /* subido 15px */
+    transform: translateX(-50%);
+    z-index: 4;
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    cursor: pointer; user-select: none;
+    background: radial-gradient(90px 90px at 50% 45%, rgba(255,255,200,0.35), rgba(0,0,0,0.45));
+    border: 1px solid rgba(255,255,255,0.65);
+    box-shadow: 
+      0 0 20px rgba(255,255,180,0.55), 
+      0 0 40px rgba(200,200,255,0.35), 
+      inset 0 0 22px rgba(255,255,200,0.35);
+    backdrop-filter: blur(8px);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+  }
+  .audioBtn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 
+      0 0 28px rgba(255,255,220,0.75), 
+      0 0 60px rgba(180,200,255,0.45), 
+      inset 0 0 28px rgba(255,255,200,0.45);
+  }
+  .audioBtn svg {
+    width: 28px; height: 28px;
+    fill:#fff;
+    filter: drop-shadow(0 0 8px rgba(255,255,220,0.75));
+  }
+  .audioBtn.muted{
+    border-color: rgba(230,240,255,.95); 
+    background: radial-gradient(90px 90px at 50% 45%, rgba(240,250,255,.75), rgba(0,0,0,.35)); 
+    box-shadow: 
+      0 0 32px rgba(220,235,255,.95), 
+      0 0 70px rgba(200,225,255,.75), 
+      inset 0 0 32px rgba(240,250,255,.65);
+  }
 
-        .rose {
-            position: relative;
-            width: 300px;
-            height: 500px;
-            z-index: 10;
-            animation: grow 3s cubic-bezier(0.4, 0, 0.2, 1) forwards, 
-                       swayTheWholeRose 8s ease-in-out infinite 3.2s;
-            transform-origin: bottom;
-            clip-path: inset(100% 0 0 0);
-        }
-        
-        .petals {
-            position: relative;
-            width: 100%;
-            height: 200px;
-            animation: gentleSway 6s ease-in-out infinite 3.5s;
-            transform-origin: bottom center;
-            z-index: 10;
-        }
-        
-        .petals > div { position: absolute; background: #d52d58; width: 60px; height: 80px; transition: all 0.5s ease-out; }
-        .petals > div:nth-child(1) { border-radius: 10px; box-shadow: 0 0 20px rgba(245, 148, 184, 0.6); left: calc(50% - 30px); top: 40px; background: #d52d58; z-index: 3; animation: bloom-center 2s ease-out 1.5s forwards, glowing 2.5s ease-in-out infinite 2s; }
-        .petals > div:nth-child(2), .petals > div:nth-child(4) { background: #b81b43; left: calc(50% - 50px); border-radius: 0 30px 0 30px; transform-origin: bottom right; }
-        .petals > div:nth-child(3), .petals > div:nth-child(5) { background: #b81b43; left: calc(50% - 10px); border-radius: 30px 0 30px 0; transform-origin: bottom left; }
-        .petals > div:nth-child(2) { top: 45px; height: 85px; z-index: 5; animation: bloom2 3s ease-in-out 1.7s forwards, glowing 2.5s ease-in-out infinite 2.2s; }
-        .petals > div:nth-child(3) { top: 45px; height: 85px; z-index: 5; animation: bloom3 3s ease-in-out 1.7s forwards, glowing 2.5s ease-in-out infinite 2.2s; }
-        .petals > div:nth-child(4) { top: 45px; height: 90px; z-index: 4; animation: bloom4 3s ease-in-out 1.9s forwards, glowing 2.5s ease-in-out infinite 2.4s; }
-        .petals > div:nth-child(5) { top: 45px; height: 90px; z-index: 4; animation: bloom5 3s ease-in-out 1.9s forwards, glowing 2.5s ease-in-out infinite 2.4s; }
-        .petals > div:nth-child(6) { top: 40px; height: 85px; z-index: 2; animation: bloom6 3s ease-in-out 2.1s forwards, glowing 2.5s ease-in-out infinite 2.6s; background: #c9204b; left: calc(50% - 40px); border-radius: 0 20px 0 20px; transform-origin: bottom right; }
-        .petals > div:nth-child(7) { top: 40px; height: 85px; z-index: 2; animation: bloom7 3s ease-in-out 2.1s forwards, glowing 2.5s ease-in-out infinite 2.6s; background: #c9204b; left: calc(50% - 20px); border-radius: 20px 0 20px 0; transform-origin: bottom left; }
-        
-        .calyx {
-            position: absolute;
-            top: 109px;
-            left: calc(50% - 5px);
-            transform: translateX(-50%);
-            z-index: 15;
-        }
-        .calyx > div { position: absolute; width: 25px; height: 55px; background: linear-gradient(to top, #054c05, #228b22); transform-origin: bottom center; clip-path: polygon(50% 0%, 100% 70%, 75% 100%, 25% 100%, 0% 70%); box-shadow: 0 0 5px rgba(0,0,0,0.3); }
-        .calyx > div:nth-child(1) { transform: rotate(-60deg); left: -22px; top: -5px; }
-        .calyx > div:nth-child(2) { transform: rotate(-20deg); left: -12px; }
-        .calyx > div:nth-child(3) { transform: rotate(18deg); left: 2px; }
-        .calyx > div:nth-child(4) { transform: rotate(55deg); left: 12px; top: -5px; }
-
-        .stem-bundle {
-            position: absolute;
-            width: 100%; height: 100%;
-            bottom: 0; left: 0;
-            z-index: 4;
-        }
-        .stem { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 10px; height: calc(100% - 120px); background: #054c05; border-radius: 0 0 50px 50px; }
-        .leaves > div:nth-child(1) { position: absolute; width: 40px; height: 70px; border-radius: 5px 40px 20px 40px; background: #054c05; transform-origin: bottom; transform: rotate(-30deg); top: 265px; left: calc(51% - 40px); box-shadow: inset 5px 5px #066406; }
-        .leaves > div:nth-child(2) { position: absolute; width: 40px; height: 70px; border-radius: 40px 0 40px 20px; background: #054c05; transform-origin: bottom; transform: rotate(30deg); top: 220px; left: 48%; box-shadow: inset -5px 5px #066406; }
-        .thorns > div { position: absolute; width: 0; height: 0; }
-        .thorns > div:nth-child(odd) { border: 5px solid transparent; border-left: 5px solid #054c05; left: calc(50% + 5px); }
-        .thorns > div:nth-child(even) { border: 5px solid transparent; border-right: 5px solid #054c05; left: calc(50% - 15px); }
-        .thorns > div:nth-child(1) { top: 300px; }
-        .thorns > div:nth-child(2) { top: 250px; }
-        
-        /* --- Keyframes --- */
-        @keyframes grow { 
-            0% { clip-path: inset(100% 0 0 0); opacity: 0; transform: translateY(50px); } 
-            70% { opacity: 1; } 
-            100% { clip-path: inset(0 0 0 0); opacity: 1; transform: translateY(0); } 
-        }
-        @keyframes fadeInText { to { opacity: 1; } }
-        @keyframes bloom-center { from { transform: scale(0.5); } to { transform: scale(1); } }
-        @keyframes bloom2 { 100% { transform: rotate(-25deg); } }
-        @keyframes bloom3 { 100% { transform: rotate(25deg); } }
-        @keyframes bloom4 { 100% { transform: rotate(-15deg); } }
-        @keyframes bloom5 { 100% { transform: rotate(15deg); } }
-        @keyframes bloom6 { 100% { transform: rotate(-10deg); } }
-        @keyframes bloom7 { 100% { transform: rotate(10deg); } }
-        @keyframes glowing { 50% { background: #e6426d; box-shadow: 0 0 30px rgba(245, 148, 184, 0.8); } }
-        @keyframes gentleSway { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(2deg); } }
-        
-        @keyframes swayTheWholeRose {
-            0% { transform: translateY(0) rotate(0deg); }
-            25% { transform: translateY(0) rotate(4deg); }
-            50% { transform: translateY(0) rotate(0deg); }
-            75% { transform: translateY(0) rotate(-4deg); }
-            100% { transform: translateY(0) rotate(0deg); }
-        }
-
-        @keyframes petalFallLeft { 0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 1; } 50%  { transform: translateY(50vh) rotate(180deg) translateX(-10vw); } 100% { transform: translateY(110vh) rotate(360deg) translateX(-15vw); opacity: 0; } }
-        @keyframes petalFallRight { 0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 1; } 50%  { transform: translateY(50vh) rotate(-180deg) translateX(10vw); } 100% { transform: translateY(110vh) rotate(-360deg) translateX(15vw); opacity: 0; } }
-        
-        @media (max-width: 600px) {
-            .scene-container {
-                padding-bottom: 20vh;
-            }
-            .rose { width: 250px; height: 400px; }
-            .petals > div { width: 50px; height: 70px; }
-            
-            .petals > div:nth-child(1) { top: 20px; }
-            .petals > div:nth-child(2), 
-            .petals > div:nth-child(3),
-            .petals > div:nth-child(4),
-            .petals > div:nth-child(5) { top: 25px; }
-            .petals > div:nth-child(6),
-            .petals > div:nth-child(7) { top: 20px; }
-
-            .calyx { 
-                top: 88px;
-            }
-            .stem-bundle .stem { height: calc(100% - 100px); }
-            .stem-bundle .leaves > div:nth-child(1) { top: 180px; }
-            .stem-bundle .leaves > div:nth-child(2) { top: 160px; }
-            .stem-bundle .thorns > div:nth-child(1) { top: 220px; }
-            .stem-bundle .thorns > div:nth-child(2) { top: 190px; }
-        }
-    </style>
+  /* Responsive móvil */
+  @media (max-width: 640px){
+    header h3{font-size:1.1rem;}
+    .hud{right:12px; top:12px}
+    .btn{padding:8px 10px; border-radius:10px}
+    .centerpiece img{width:min(82vmin, 360px)}
+    .audioBtn{bottom:28px; width:56px; height:56px}
+    .brand{left:12px; bottom:76px; font-size:11px}
+  }
+</style>
 </head>
 <body>
-    <div id="particles-container"></div>
-    <div id="rose-petals-fall-container"></div>
-    
-    <div class="scene-container">
-        <div class="text">I Love You ♥️</div>
-        <div class="rose">
-            <div class="petals">
-                <div></div> <div></div> <div></div>
-                <div></div> <div></div> <div></div> <div></div>
-            </div>
-            <div class="calyx">
-                <div></div> <div></div> <div></div> <div></div>
-            </div>
-            <div class="stem-bundle">
-                <div class="stem"></div>
-                <div class="leaves">
-                    <div></div> <div></div>
-                </div>
-                <div class="thorns">
-                    <div></div> <div></div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <!-- Título en encabezado -->
+  <header>
+    <h3>✨ Micaela, tú eres la flor más linda de mi vida</h3>
+  </header>
+
+  <canvas id="sky"></canvas>
+
+  <!-- Centro -->
+  <div class="centerpiece">
+    <img id="heroImage" src="" alt="Imagen central" loading="eager" />
+  </div>
+
+  <!-- Audio de fondo -->
+  <audio id="backgroundMusic" loop autoplay playsinline preload="auto">
+    <source src="https://dl.dropboxusercontent.com/scl/fi/xac2mz0t4homhkvkr1d5w/FLORES-AMARILLAS.mp3?rlkey=uush4yu80dlaz54tbfilgdnb5&st=d0wjojvs" type="audio/mpeg">
+  </audio>
+
+  <!-- Botón circular de audio -->
+  <button id="audioBtn" class="audioBtn">
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+
+  <div class="hud">
+    <div id="toggleGlow" class="btn toggle">⭐ Boost amarillo</div>
+    <div id="makeWish" class="btn">🌠 Lanza una fugaz</div>
+  </div>
+
+  <div class="brand">Haz clic o toca para lanzar una estrella fugaz</div>
+
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const particlesContainer = document.getElementById('particles-container');
-        
-        const isMobile = window.innerWidth <= 600;
-        const particleCount = isMobile ? 20 : 40;
+(() => {
+  const canvas = document.getElementById('sky');
+  const ctx = canvas.getContext('2d');
+  let DPR = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+  let W = 0, H = 0;
+  let stars = [], twinkles = [], comets = [];
+  let lastTime = 0;
+  let yellowBoost = false;
 
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.classList.add('particle');
-            
-            const size = isMobile ? Math.random() * 60 + 20 : Math.random() * 150 + 50; 
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            
-            particle.style.left = Math.random() * 100 + 'vw';
-            
-            const duration = Math.random() * 8 + 5;
-            const delay = Math.random() * -10;
-            
-            particle.style.animation = `move-particles ${duration}s linear ${delay}s infinite`;
+  function resize(){
+    W = canvas.width  = Math.floor(innerWidth  * DPR);
+    H = canvas.height = Math.floor(innerHeight * DPR);
+  }
+  window.addEventListener('resize', () => { DPR = Math.max(1, Math.floor(devicePixelRatio||1)); resize(); initStars(true); });
+  resize();
 
-            particlesContainer.appendChild(particle);
-        }
+  function rand(min,max){ return Math.random()*(max-min)+min; }
 
-        const petalFallContainer = document.getElementById('rose-petals-fall-container');
-        const roseElement = document.querySelector('.rose');
-        let petalFallDirection = 0;
+  // ---------- Estrellas estáticas + parpadeo ----------
+  function initStars(keep=false){
+    const targetCount = Math.floor((W*H)/(11000 * DPR));
+    if(!keep){ stars = []; twinkles = []; }
+    while(stars.length < targetCount){
+      const x = Math.random()*W;
+      const y = Math.random()*H;
+      const r = rand(0.6, 1.6) * DPR;
+      const tone = Math.random();
+      const color = tone < 0.15 ? `rgba(255,193,7,${rand(.6,.9)})` : `rgba(${200+~~rand(0,55)},${210+~~rand(0,45)},255,${rand(.45,.9)})`;
+      stars.push({x,y,r,color});
+      if(Math.random()<0.45){
+        twinkles.push({x,y,base:rand(.25,.9),spd:rand(0.8,1.6),phase:rand(0,Math.PI*2)});
+      }
+    }
+  }
+  initStars();
 
-        function createFallingRosePetal() {
-            if (!roseElement) return;
-            const petal = document.createElement('div');
-            petal.classList.add('falling-rose-petal');
-            if (petalFallDirection % 2 === 0) { petal.classList.add('fall-left'); } else { petal.classList.add('fall-right'); }
-            petalFallDirection++;
-            const rect = roseElement.getBoundingClientRect();
-            const startX = rect.left + rect.width / 2;
-            const startY = rect.top + 80;
-            petal.style.left = `${startX}px`;
-            petal.style.top = `${startY}px`;
-            petalFallContainer.appendChild(petal);
-            petal.addEventListener('animationend', () => { petal.remove(); });
-        }
-        
-        setTimeout(() => { setInterval(createFallingRosePetal, 4500); }, 4000);
-    });
+  // ---------- Cometas (estrellas fugaces) ----------
+  function spawnComet(x,y,dir){
+    if(x==null||y==null){ x = rand(-W*0.1, W*0.3); y = rand(-H*0.05, H*0.35); }
+    if(dir==null){ dir = rand(Math.PI*0.15, Math.PI*0.35); }
+    const speed = rand(650, 980) * DPR; // px/s
+    const len   = rand(160, 260) * DPR;
+    const life  = rand(950, 1400); // ms
+    const width = rand(1.4, 2.2) * DPR;
+    const hueShift = yellowBoost ? 1 : 0;
+    comets.push({x,y,dir,speed,len,life,age:0,width,hueShift});
+  }
+
+  // Auto: cada 3 s
+  setInterval(() => spawnComet(), 3000);
+
+  // Interacción
+  canvas.addEventListener('pointerdown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * DPR;
+    const y = (e.clientY - rect.top) * DPR;
+    const dir = rand(Math.PI*0.2, Math.PI*0.6);
+    spawnComet(x,y,dir);
+  });
+
+  document.getElementById('makeWish').onclick = () => spawnComet();
+  const toggle = document.getElementById('toggleGlow');
+  toggle.onclick = () => { yellowBoost = !yellowBoost; toggle.classList.toggle('on', yellowBoost); };
+
+  // ===== Audio: autoplay con múltiples rutas =====
+  const audioEl = document.getElementById('backgroundMusic');
+  const audioBtn = document.getElementById('audioBtn');
+
+  function setIcon(state){
+    let svg='';
+    if(state==='play'){
+      svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>';
+      audioBtn.classList.remove('muted');
+    } else if(state==='speaker'){
+      svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm12.5 2a4.5 4.5 0 0 0-2.25-3.9v7.8A4.5 4.5 0 0 0 15.5 12zM15.5 5a9 9 0 0 1 0 14c-1.1 0-2-.9-2-2 0-.3.07-.57.18-.82A7 7 0 0 0 20 12a7 7 0 0 0-6.32-4.18c-.11-.25-.18-.52-.18-.82 0-1.1.9-2 2-2z"/></svg>';
+      audioBtn.classList.remove('muted');
+    } else {
+      svg='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 10v4h4l5 5V5L7 10H3zm13.59-3L15 8.59 17.41 11 15 13.41 16.59 15 19 12.59 21.41 15 23 13.41 20.59 11 23 8.59 21.41 7 19 9.41 16.59 7z"/></svg>';
+      audioBtn.classList.add('muted');
+    }
+    audioBtn.innerHTML = svg;
+  }
+  setIcon('play');
+
+  async function tryAutoplay(){
+    try{
+      audioEl.muted = false;
+      await audioEl.play();           // 1) directo con sonido
+      setIcon('speaker');
+    }catch(e1){
+      try{
+        audioEl.muted = true;         // 2) arranca silenciado
+        await audioEl.play();
+        setTimeout(() => {            // intento de desmuteo inmediato
+          try{ audioEl.muted = false; setIcon('speaker'); }catch(_){}
+        }, 150);
+      }catch(e2){
+        // 3) último recurso: desbloquear en primer gesto
+        const unlock = async () => {
+          try{
+            audioEl.muted = false;
+            await audioEl.play();
+            setIcon('speaker');
+          }catch(_){}
+          document.removeEventListener('pointerdown', unlock);
+          document.removeEventListener('keydown', unlock);
+        };
+        document.addEventListener('pointerdown', unlock, {once:true});
+        document.addEventListener('keydown', unlock, {once:true});
+      }
+    }
+  }
+  window.addEventListener('load', tryAutoplay);
+
+  audioBtn.addEventListener('click', async () => {
+    try{
+      if(audioEl.paused){
+        audioEl.muted = false;
+        await audioEl.play();
+        setIcon('speaker');
+      } else {
+        audioEl.muted = !audioEl.muted;
+        setIcon(audioEl.muted ? 'muted' : 'speaker');
+      }
+    }catch{ setIcon('play'); }
+  });
+
+  audioEl.addEventListener('play', () => setIcon(audioEl.muted ? 'muted' : 'speaker'));
+  audioEl.addEventListener('pause', () => setIcon('play'));
+  audioEl.addEventListener('volumechange', () => setIcon(audioEl.muted ? 'muted' : 'speaker'));
+
+  // ===== Slideshow de 4 imágenes (cambia cada 10s) =====
+  const hero = document.getElementById('heroImage');
+  const imageList = [
+    'https://github.com/axon67/ProyectoRutasCerrigan/blob/main/Img/rojo.gif?raw=true',
+    'https://cdn.pixabay.com/animation/2024/04/05/15/10/15-10-39-863_512.gif',
+    'https://cdn.pixabay.com/animation/2024/03/13/01/06/01-06-07-391_512.gif',
+    'https://png.pngtree.com/png-clipart/20241110/original/pngtree-yellow-rose-bouquet-clipart-illustration-png-image_16826873.png'
+    
+  ].filter(Boolean);
+
+  let imgIndex = 0;
+
+  function swapTo(index){
+    const nextSrc = imageList[index % imageList.length];
+    if(!nextSrc) return;
+    const preload = new Image();
+    preload.onload = () => {
+      hero.classList.add('is-fading');
+      setTimeout(() => { hero.src = preload.src; hero.classList.remove('is-fading'); }, 160);
+    };
+    preload.src = nextSrc;
+  }
+
+  if(imageList.length){ swapTo(0); }
+  setInterval(() => {
+    if(imageList.length>1){ imgIndex = (imgIndex+1)%imageList.length; swapTo(imgIndex); }
+  }, 10000);
+
+  // ---------- Dibujo del cielo ----------
+  function drawBackground(){
+    const gx = ctx.createRadialGradient(W*0.72, H*0.18, 0, W*0.72, H*0.18, Math.max(W,H)*0.9);
+    gx.addColorStop(0, 'rgba(255,193,7,0.04)');
+    gx.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gx;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  function drawStars(t){
+    for(const s of stars){
+      ctx.beginPath();
+      ctx.fillStyle = s.color;
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fill();
+
+      const g = ctx.createRadialGradient(s.x,s.y,0, s.x,s.y, s.r*3.2);
+      g.addColorStop(0, 'rgba(255,255,255,.25)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s.x,s.y, s.r*3.2, 0, Math.PI*2); ctx.fill();
+    }
+
+    for(const tw of twinkles){
+      const a = tw.base + Math.sin(t*tw.spd + tw.phase)*0.35 + 0.35;
+      ctx.globalAlpha = Math.max(0, Math.min(1, a));
+      ctx.fillStyle = 'rgba(255,255,255,1)';
+      ctx.fillRect(tw.x, tw.y, 1*DPR, 1*DPR);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function drawComets(dt){
+    for(let i=comets.length-1; i>=0; i--){
+      const c = comets[i];
+      c.age += dt;
+      const k = c.age / c.life;
+      if(k>=1){ comets.splice(i,1); continue; }
+      const vx = Math.cos(c.dir)*c.speed * (dt/1000);
+      const vy = Math.sin(c.dir)*c.speed * (dt/1000);
+      c.x += vx; c.y += vy;
+
+      const tail = c.len * (1 - k*0.65);
+      const tx = c.x - Math.cos(c.dir)*tail;
+      const ty = c.y - Math.sin(c.dir)*tail;
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+
+      const grad = ctx.createLinearGradient(c.x, c.y, tx, ty);
+      const headCol = c.hueShift ? 'rgba(255,193,7,0.95)' : 'rgba(255,213,79,0.9)';
+      grad.addColorStop(0, headCol);
+      grad.addColorStop(0.2, 'rgba(255,193,7,0.55)');
+      grad.addColorStop(1, 'rgba(255,193,7,0)');
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = c.width;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(tx, ty);
+      ctx.lineTo(c.x, c.y);
+      ctx.stroke();
+
+      const spark = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, 18*DPR);
+      spark.addColorStop(0, 'rgba(255,241,118,0.9)');
+      spark.addColorStop(0.5, 'rgba(255,213,79,0.65)');
+      spark.addColorStop(1, 'rgba(255,193,7,0)');
+      ctx.fillStyle = spark;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, 18*DPR, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+  }
+
+  function loop(t){
+    if(!lastTime) lastTime = t; const dt = Math.min(48, t - lastTime); lastTime = t;
+    ctx.fillStyle = 'rgba(2,3,10,0.34)';
+    ctx.fillRect(0,0,W,H);
+
+    drawBackground();
+    drawStars(t*0.0025);
+    drawComets(dt);
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
 </script>
 </body>
 </html>
